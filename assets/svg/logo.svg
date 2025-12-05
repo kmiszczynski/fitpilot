@@ -1,0 +1,57 @@
+<svg class="logo" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#6366F1"></stop>
+            <stop offset="100%" style="stop-color:#3B82F6"></stop>
+        </linearGradient>
+        <linearGradient id="dumbbellGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#10B981"></stop>
+            <stop offset="50%" style="stop-color:#059669"></stop>
+            <stop offset="100%" style="stop-color:#047857"></stop>
+        </linearGradient>
+        <linearGradient id="plateGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#10B981"></stop>
+            <stop offset="50%" style="stop-color:#059669"></stop>
+            <stop offset="100%" style="stop-color:#047857"></stop>
+        </linearGradient>
+    </defs>
+
+    <!-- Outer ring background -->
+    <circle cx="100" cy="100" r="88" fill="none" stroke="#2d3748" stroke-width="3"></circle>
+    <!-- Progress arc -->
+    <circle cx="100" cy="100" r="88" fill="none" stroke="url(#ringGrad)" stroke-width="5" stroke-linecap="round" stroke-dasharray="553" stroke-dashoffset="100" transform="rotate(-90 100 100)"></circle>
+
+    <!-- Cardinal direction letters - bigger and bolder -->
+    <text x="100" y="36" text-anchor="middle" fill="#10B981" font-size="20" font-weight="700" font-family="system-ui, sans-serif">N</text>
+    <text x="100" y="180" text-anchor="middle" fill="#64748b" font-size="18" font-weight="600" font-family="system-ui, sans-serif">S</text>
+    <text x="24" y="106" text-anchor="middle" fill="#64748b" font-size="18" font-weight="600" font-family="system-ui, sans-serif">W</text>
+    <text x="176" y="106" text-anchor="middle" fill="#64748b" font-size="18" font-weight="600" font-family="system-ui, sans-serif">E</text>
+
+    <!-- Realistic Dumbbell as compass needle -->
+    <g transform="translate(100, 100) rotate(-30)">
+        <!-- Center bar / handle -->
+        <rect x="-5" y="-38" width="10" height="76" rx="5" fill="#0d9668"></rect>
+        <!-- Handle grip texture -->
+        <rect x="-4" y="-15" width="8" height="30" rx="2" fill="#047857"></rect>
+
+        <!-- Top weight plates (symmetrical) -->
+        <!-- Outer plate -->
+        <rect x="-18" y="-52" width="36" height="12" rx="3" fill="url(#plateGrad)"></rect>
+        <!-- Inner plate -->
+        <rect x="-14" y="-48" width="28" height="8" rx="2" fill="#059669"></rect>
+        <!-- Collar -->
+        <rect x="-8" y="-40" width="16" height="4" rx="1" fill="#047857"></rect>
+
+        <!-- Bottom weight plates (symmetrical - same size as top) -->
+        <!-- Outer plate -->
+        <rect x="-18" y="40" width="36" height="12" rx="3" fill="url(#plateGrad)"></rect>
+        <!-- Inner plate -->
+        <rect x="-14" y="40" width="28" height="8" rx="2" fill="#047857"></rect>
+        <!-- Collar -->
+        <rect x="-8" y="36" width="16" height="4" rx="1" fill="#047857"></rect>
+    </g>
+
+    <!-- Center point -->
+    <circle cx="100" cy="100" r="10" fill="#1e293b" stroke="#10B981" stroke-width="3"></circle>
+    <circle cx="100" cy="100" r="4" fill="#10B981"></circle>
+</svg>
