@@ -6,8 +6,8 @@ import '../widgets/custom_text_field.dart';
 import '../widgets/loading_button.dart';
 import '../widgets/loading_overlay.dart';
 import '../constants/app_constants.dart';
+import '../utils/navigation_helper.dart';
 import 'register_screen.dart';
-import 'dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key, required this.title});
@@ -93,12 +93,8 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void _navigateToDashboard() {
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => const DashboardScreen()),
-      (route) => false,
-    );
+  Future<void> _navigateToDashboard() async {
+    await NavigationHelper.navigateAfterLogin(context);
   }
 
   void _showError(String message) {

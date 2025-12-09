@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../widgets/app_logo.dart';
 import '../constants/app_constants.dart';
+import '../utils/navigation_helper.dart';
 import 'login_screen.dart';
-import 'dashboard_screen.dart';
 
 /// Splash screen that checks authentication status
 class SplashScreen extends StatefulWidget {
@@ -34,13 +34,8 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!mounted) return;
 
     if (hasAuth) {
-      // User is logged in, go to dashboard
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const DashboardScreen(),
-        ),
-      );
+      // User is logged in, check if they have a profile and navigate accordingly
+      await NavigationHelper.navigateAfterLogin(context);
     } else {
       // User not logged in, go to login screen
       Navigator.pushReplacement(

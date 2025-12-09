@@ -3,7 +3,7 @@ import '../services/auth_service.dart';
 import '../widgets/app_logo.dart';
 import '../widgets/loading_button.dart';
 import '../constants/app_constants.dart';
-import 'dashboard_screen.dart';
+import '../utils/navigation_helper.dart';
 
 class EmailConfirmScreen extends StatefulWidget {
   final String email;
@@ -64,11 +64,8 @@ class _EmailConfirmScreenState extends State<EmailConfirmScreen> {
     if (!mounted) return;
 
     if (loginResult['success']) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => const DashboardScreen()),
-        (route) => false,
-      );
+      // Navigate after successful login (checks profile and navigates accordingly)
+      await NavigationHelper.navigateAfterLogin(context);
     } else {
       _showWarning('Email confirmed! Please log in. ${loginResult['message']}');
       Navigator.popUntil(context, (route) => route.isFirst);
