@@ -1,6 +1,5 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'storage_service.dart';
+import 'http_client_service.dart';
 import 'api_logger.dart';
 
 /// Profile API Service
@@ -14,16 +13,7 @@ class ProfileService {
 
   /// Get authorization headers with the stored ID token
   static Future<Map<String, String>> _getHeaders() async {
-    final idToken = await StorageService.getIdToken();
-
-    if (idToken == null) {
-      throw Exception('No ID token found. Please login first.');
-    }
-
-    return {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $idToken',
-    };
+    return await HttpClientService.getAuthHeaders();
   }
 
   /// GET - Fetch user profile
@@ -40,7 +30,7 @@ class ProfileService {
         headers: headers,
       );
 
-      final response = await http.get(
+      final response = await HttpClientService.get(
         Uri.parse(_profileUrl),
         headers: headers,
       );
@@ -111,7 +101,7 @@ class ProfileService {
         parameters: profileData,
       );
 
-      final response = await http.post(
+      final response = await HttpClientService.post(
         Uri.parse(_profileUrl),
         headers: headers,
         body: json.encode(profileData),
@@ -183,7 +173,7 @@ class ProfileService {
         parameters: profileData,
       );
 
-      final response = await http.put(
+      final response = await HttpClientService.put(
         Uri.parse(_profileUrl),
         headers: headers,
         body: json.encode(profileData),
@@ -254,7 +244,7 @@ class ProfileService {
         headers: headers,
       );
 
-      final response = await http.delete(
+      final response = await HttpClientService.delete(
         Uri.parse(_profileUrl),
         headers: headers,
       );

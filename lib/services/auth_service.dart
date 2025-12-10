@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:amazon_cognito_identity_dart_2/cognito.dart';
 import 'package:flutter_appauth/flutter_appauth.dart';
+import 'package:http/http.dart' as http;
 import 'storage_service.dart';
 import 'api_logger.dart';
 
@@ -537,6 +538,153 @@ class AuthService {
   Future<bool> isLoggedIn() async {
     final session = await getCurrentSession();
     return session != null && session.isValid();
+  }
+
+  /// Refresh access token using refresh token
+  /// Works for both email/password and OAuth users
+  Future<Map<String, dynamic>> refreshAccessToken() async {
+    final startTime = DateTime.now();
+
+    ApiLogger.logRequest(
+      operation: 'refreshAccessToken',
+      url: _cognitoApiUrl,
+      headers: {
+        'Content-Type': 'application/x-amz-json-1.1',
+        'X-Amz-Target': 'AWSCognitoIdentityProviderService.InitiateAuth',
+      },
+      parameters: {'AuthFlow': 'REFRESH_TOKEN_AUTH'},
+    );
+
+    try {
+      final refreshToken = await StorageService.getRefreshToken();
+
+      if (refreshToken == null) {
+        final response = {
+          'success': false,
+          'message': 'No refresh token found',
+        };
+
+        ApiLogger.logResponse(
+          operation: 'refreshAccessToken',
+          response: response,
+          duration: DateTime.now().difference(startTime),
+        );
+
+        return response;
+      }
+
+      // Try email/password flow first (if _currentUser exists)
+      if (_currentUser != null) {
+        try {
+          final session = await _currentUser!.refreshSession(
+            CognitoRefreshToken(refreshToken),
+          );
+
+          if (session != null) {
+            final newAccessToken = session.getAccessToken().getJwtToken();
+            final newIdToken = session.getIdToken().getJwtToken();
+
+            // Save new tokens
+            await StorageService.saveTokens(
+              accessToken: newAccessToken,
+              idToken: newIdToken,
+              refreshToken: refreshToken,
+            );
+
+            final response = {
+              'success': true,
+              'message': 'Token refreshed successfully',
+              'accessToken': newAccessToken,
+              'idToken': newIdToken,
+            };
+
+            ApiLogger.logResponse(
+              operation: 'refreshAccessToken',
+              response: response,
+              duration: DateTime.now().difference(startTime),
+            );
+
+            return response;
+          }
+        } catch (e) {
+          // Fall through to OAuth flow if email/password refresh fails
+        }
+      }
+
+      // OAuth flow - use Cognito token endpoint directly
+      final tokenEndpoint = '$_cognitoDomain/oauth2/token';
+      final tokenResponse = await http.post(
+        Uri.parse(tokenEndpoint),
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: {
+          'grant_type': 'refresh_token',
+          'client_id': _clientId,
+          'refresh_token': refreshToken,
+        },
+      );
+
+      if (tokenResponse.statusCode == 200) {
+        final tokenData = json.decode(tokenResponse.body);
+        final newAccessToken = tokenData['access_token'] as String;
+        final newIdToken = tokenData['id_token'] as String;
+
+        // Extract email from new ID token
+        final email = _extractEmailFromIdToken(newIdToken);
+
+        // Save new tokens
+        await StorageService.saveTokens(
+          accessToken: newAccessToken,
+          idToken: newIdToken,
+          refreshToken: refreshToken,
+          userEmail: email,
+        );
+
+        final response = {
+          'success': true,
+          'message': 'Token refreshed successfully',
+          'accessToken': newAccessToken,
+          'idToken': newIdToken,
+        };
+
+        ApiLogger.logResponse(
+          operation: 'refreshAccessToken',
+          response: response,
+          duration: DateTime.now().difference(startTime),
+        );
+
+        return response;
+      } else {
+        final response = {
+          'success': false,
+          'message': 'Token refresh failed',
+          'statusCode': tokenResponse.statusCode,
+        };
+
+        ApiLogger.logResponse(
+          operation: 'refreshAccessToken',
+          response: response,
+          duration: DateTime.now().difference(startTime),
+        );
+
+        return response;
+      }
+    } catch (e, stackTrace) {
+      final response = {
+        'success': false,
+        'message': 'Token refresh error: ${e.toString()}',
+      };
+
+      ApiLogger.logError(
+        operation: 'refreshAccessToken',
+        error: e,
+        stackTrace: stackTrace,
+        duration: DateTime.now().difference(startTime),
+      );
+
+      return response;
+    }
   }
 
   /// Resend confirmation code
