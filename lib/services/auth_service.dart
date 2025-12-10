@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:amazon_cognito_identity_dart_2/cognito.dart';
 import 'package:flutter_appauth/flutter_appauth.dart';
 import 'storage_service.dart';
@@ -263,11 +264,15 @@ class AuthService {
       );
 
       if (result != null) {
+        // Extract email from ID token
+        final email = _extractEmailFromIdToken(result.idToken);
+
         // Save tokens securely
         await StorageService.saveTokens(
           accessToken: result.accessToken,
           idToken: result.idToken,
           refreshToken: result.refreshToken,
+          userEmail: email,
         );
 
         final response = {
@@ -354,11 +359,15 @@ class AuthService {
       );
 
       if (result != null) {
+        // Extract email from ID token
+        final email = _extractEmailFromIdToken(result.idToken);
+
         // Save tokens securely
         await StorageService.saveTokens(
           accessToken: result.accessToken,
           idToken: result.idToken,
           refreshToken: result.refreshToken,
+          userEmail: email,
         );
 
         final response = {
@@ -440,11 +449,15 @@ class AuthService {
       );
 
       if (result != null) {
+        // Extract email from ID token
+        final email = _extractEmailFromIdToken(result.idToken);
+
         // Save tokens securely
         await StorageService.saveTokens(
           accessToken: result.accessToken,
           idToken: result.idToken,
           refreshToken: result.refreshToken,
+          userEmail: email,
         );
 
         final response = {
@@ -725,6 +738,30 @@ class AuthService {
       );
 
       return response;
+    }
+  }
+
+  /// Helper method to extract email from ID token JWT
+  String? _extractEmailFromIdToken(String? idToken) {
+    if (idToken == null) return null;
+
+    try {
+      // JWT format: header.payload.signature
+      final parts = idToken.split('.');
+      if (parts.length != 3) return null;
+
+      // Decode the payload (second part)
+      final payload = parts[1];
+      // Add padding if needed for base64 decoding
+      final normalized = base64Url.normalize(payload);
+      final decoded = utf8.decode(base64Url.decode(normalized));
+      final payloadMap = json.decode(decoded) as Map<String, dynamic>;
+
+      // Extract email from payload
+      return payloadMap['email'] as String?;
+    } catch (e) {
+      // If extraction fails, return null
+      return null;
     }
   }
 
