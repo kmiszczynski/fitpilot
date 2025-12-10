@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
+import 'package:go_router/go_router.dart';
+import '../features/auth/data/datasources/auth_remote_datasource.dart';
+import '../features/auth/data/repositories/auth_repository_impl.dart';
+import '../features/auth/domain/repositories/auth_repository.dart';
+import '../core/utils/navigation_utils.dart';
 import '../widgets/app_logo.dart';
 import '../widgets/social_login_button.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/loading_button.dart';
 import '../widgets/loading_overlay.dart';
 import '../constants/app_constants.dart';
-import '../utils/navigation_helper.dart';
-import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key, required this.title});
@@ -22,8 +24,14 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _authService = AuthService();
+  late final AuthRepository _authRepository;
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _authRepository = AuthRepositoryImpl(AuthRemoteDataSourceImpl());
+  }
 
   @override
   void dispose() {
@@ -37,18 +45,23 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() => _isLoading = true);
 
       try {
-        final result = await _authService.login(
+        final result = await _authRepository.login(
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );
 
         if (!mounted) return;
 
-        if (result['success']) {
-          _navigateToDashboard();
-        } else {
-          _showError(result['message']);
-        }
+        result.fold(
+          (failure) {
+            setState(() => _isLoading = false);
+            _showError(failure.message);
+          },
+          (tokens) async {
+            // Check profile and navigate appropriately
+            await NavigationUtils.navigateAfterLogin(context);
+          },
+        );
       } finally {
         if (mounted) setState(() => _isLoading = false);
       }
@@ -59,16 +72,19 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final result = await _authService.loginWithFacebook();
+      final result = await _authRepository.loginWithFacebook();
 
       if (!mounted) return;
 
-      if (result['success']) {
-        _navigateToDashboard();
-      } else {
-        setState(() => _isLoading = false);
-        _showError(result['message']);
-      }
+      result.fold(
+        (failure) {
+          setState(() => _isLoading = false);
+          _showError(failure.message);
+        },
+        (tokens) async {
+          await NavigationUtils.navigateAfterLogin(context);
+        },
+      );
     } catch (e) {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -78,23 +94,22 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final result = await _authService.loginWithGoogle();
+      final result = await _authRepository.loginWithGoogle();
 
       if (!mounted) return;
 
-      if (result['success']) {
-        _navigateToDashboard();
-      } else {
-        setState(() => _isLoading = false);
-        _showError(result['message']);
-      }
+      result.fold(
+        (failure) {
+          setState(() => _isLoading = false);
+          _showError(failure.message);
+        },
+        (tokens) async {
+          await NavigationUtils.navigateAfterLogin(context);
+        },
+      );
     } catch (e) {
       if (mounted) setState(() => _isLoading = false);
     }
-  }
-
-  Future<void> _navigateToDashboard() async {
-    await NavigationHelper.navigateAfterLogin(context);
   }
 
   void _showError(String message) {
@@ -107,10 +122,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _navigateToRegister() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const RegisterScreen()),
-    );
+    context.go('/register');
   }
 
   @override

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../constants/app_constants.dart';
-import '../services/auth_service.dart';
-import 'login_screen.dart';
-import 'profile_form_step2_screen.dart';
+import '../features/auth/data/datasources/auth_remote_datasource.dart';
+import '../features/auth/data/repositories/auth_repository_impl.dart';
+import '../features/auth/domain/repositories/auth_repository.dart';
 
 class ProfileFormScreen extends StatefulWidget {
   const ProfileFormScreen({super.key});
@@ -13,12 +14,18 @@ class ProfileFormScreen extends StatefulWidget {
 
 class _ProfileFormScreenState extends State<ProfileFormScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _authService = AuthService();
+  late final AuthRepository _authRepository;
   final _nameController = TextEditingController();
   final _ageController = TextEditingController();
 
   String? _selectedSex;
   bool _isFormValid = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _authRepository = AuthRepositoryImpl(AuthRemoteDataSourceImpl());
+  }
 
   @override
   void dispose() {
@@ -37,31 +44,23 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
   void _onContinue() {
     if (_formKey.currentState!.validate() && _selectedSex != null) {
       // Navigate to step 2 with collected data
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ProfileFormStep2Screen(
-            name: _nameController.text.trim(),
-            age: int.parse(_ageController.text),
-            sex: _selectedSex!,
-          ),
-        ),
+      context.goNamed(
+        'profileStep2',
+        extra: {
+          'name': _nameController.text.trim(),
+          'age': int.parse(_ageController.text),
+          'sex': _selectedSex!,
+        },
       );
     }
   }
 
   Future<void> _logout() async {
-    await _authService.logout();
+    await _authRepository.logout();
 
     if (!mounted) return;
 
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const LoginScreen(title: 'FitPilot'),
-      ),
-      (route) => false,
-    );
+    context.go('/login');
   }
 
   @override

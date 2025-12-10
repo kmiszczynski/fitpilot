@@ -11,17 +11,13 @@ class UserProfileModel with _$UserProfileModel {
   const UserProfileModel._();
 
   const factory UserProfileModel({
-    required String id,
     required String name,
+    required String email,
     required int age,
     required String sex,
-    required double height,
-    required double weight,
-    required String activityLevel,
-    required String goal,
-    String? email,
-    DateTime? createdAt,
-    DateTime? updatedAt,
+    required int trainingFrequency,
+    required String target,
+    @Default([]) List<String> equipment,
   }) = _UserProfileModel;
 
   factory UserProfileModel.fromJson(Map<String, dynamic> json) =>
@@ -30,34 +26,26 @@ class UserProfileModel with _$UserProfileModel {
   /// Convert model to domain entity
   UserProfile toEntity() {
     return UserProfile(
-      id: id,
       name: name,
+      email: email,
       age: age,
       sex: sex,
-      height: height,
-      weight: weight,
-      activityLevel: activityLevel,
-      goal: goal,
-      email: email,
-      createdAt: createdAt,
-      updatedAt: updatedAt,
+      trainingFrequency: trainingFrequency,
+      target: target,
+      equipment: equipment,
     );
   }
 
   /// Create model from domain entity
   factory UserProfileModel.fromEntity(UserProfile entity) {
     return UserProfileModel(
-      id: entity.id,
       name: entity.name,
+      email: entity.email,
       age: entity.age,
       sex: entity.sex,
-      height: entity.height,
-      weight: entity.weight,
-      activityLevel: entity.activityLevel,
-      goal: entity.goal,
-      email: entity.email,
-      createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt,
+      trainingFrequency: entity.trainingFrequency,
+      target: entity.target,
+      equipment: entity.equipment,
     );
   }
 }

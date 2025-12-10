@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
+import 'package:go_router/go_router.dart';
+import '../services/storage_service.dart';
+import '../features/profile/data/datasources/profile_remote_datasource.dart';
+import '../features/profile/data/repositories/profile_repository_impl.dart';
+import '../core/network/dio_client.dart';
 import '../widgets/app_logo.dart';
-import '../constants/app_constants.dart';
-import '../utils/navigation_helper.dart';
-import 'login_screen.dart';
 
-/// Splash screen that checks authentication status
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -14,67 +14,71 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  final _authService = AuthService();
-
   @override
   void initState() {
     super.initState();
-    _checkAuthStatus();
+    _checkAuthAndNavigate();
   }
 
-  Future<void> _checkAuthStatus() async {
-    // Add a small delay for better UX (optional)
-    await Future.delayed(const Duration(seconds: 1));
+  Future<void> _checkAuthAndNavigate() async {
+    // Wait a bit for splash screen effect
+    await Future.delayed(const Duration(seconds: 2));
 
     if (!mounted) return;
 
-    // Check if user has stored authentication
-    final hasAuth = await _authService.hasStoredAuth();
+    // Check if user is authenticated
+    final hasAuth = await StorageService.hasValidTokens();
 
-    if (!mounted) return;
+    if (!hasAuth) {
+      // Not authenticated, go to login
+      context.go('/login');
+      return;
+    }
 
-    if (hasAuth) {
-      // User is logged in, check if they have a profile and navigate accordingly
-      await NavigationHelper.navigateAfterLogin(context);
-    } else {
-      // User not logged in, go to login screen
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const LoginScreen(title: 'FitPilot'),
-        ),
+    // Authenticated, check if user has profile
+    try {
+      final repository = ProfileRepositoryImpl(
+        ProfileRemoteDataSourceImpl(DioClient.instance),
       );
+
+      final result = await repository.getProfile();
+
+      if (!mounted) return;
+
+      result.fold(
+        (failure) {
+          // Profile not found or error, go to profile setup
+          if (failure.message.contains('not found') ||
+              failure.statusCode == 404) {
+            context.go('/profile/setup/step1');
+          } else {
+            // Other error, go to dashboard anyway
+            context.go('/dashboard');
+          }
+        },
+        (profile) {
+          // Profile exists, go to dashboard
+          context.go('/dashboard');
+        },
+      );
+    } catch (e) {
+      // Error checking profile, go to dashboard
+      if (mounted) {
+        context.go('/dashboard');
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const AppLogo(),
-            const SizedBox(height: AppConstants.spacingXXLarge),
-
-            // Loading indicator
-            const CircularProgressIndicator(),
-            const SizedBox(height: AppConstants.spacingMedium),
-
-            Text(
-              'FitPilot',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 8),
-
-            Text(
-              'Loading...',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey[600],
-                  ),
-            ),
+            AppLogo(),
+            SizedBox(height: 24),
+            CircularProgressIndicator(),
           ],
         ),
       ),

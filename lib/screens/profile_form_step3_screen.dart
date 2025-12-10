@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../constants/app_constants.dart';
-import '../services/auth_service.dart';
-import '../services/profile_service.dart';
+import '../features/auth/data/datasources/auth_remote_datasource.dart';
+import '../features/auth/data/repositories/auth_repository_impl.dart';
+import '../features/auth/domain/repositories/auth_repository.dart';
+import '../features/profile/data/datasources/profile_remote_datasource.dart';
+import '../features/profile/data/repositories/profile_repository_impl.dart';
+import '../features/profile/domain/repositories/profile_repository.dart';
+import '../features/profile/domain/entities/user_profile.dart';
+import '../core/network/dio_client.dart';
 import '../services/storage_service.dart';
 import '../widgets/loading_overlay.dart';
-import 'login_screen.dart';
-import 'dashboard_screen.dart';
 
 class ProfileFormStep3Screen extends StatefulWidget {
   final String name;
@@ -28,10 +33,20 @@ class ProfileFormStep3Screen extends StatefulWidget {
 }
 
 class _ProfileFormStep3ScreenState extends State<ProfileFormStep3Screen> {
-  final _authService = AuthService();
+  late final AuthRepository _authRepository;
+  late final ProfileRepository _profileRepository;
   bool _isLoading = false;
 
   final Set<String> _selectedEquipment = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _authRepository = AuthRepositoryImpl(AuthRemoteDataSourceImpl());
+    _profileRepository = ProfileRepositoryImpl(
+      ProfileRemoteDataSourceImpl(DioClient.instance),
+    );
+  }
 
   void _toggleEquipment(String equipment) {
     setState(() {
@@ -61,38 +76,43 @@ class _ProfileFormStep3ScreenState extends State<ProfileFormStep3Screen> {
         return;
       }
 
-      // Prepare profile data
-      final profileData = {
-        'email': email,
-        'name': widget.name,
-        'age': widget.age,
-        'sex': widget.sex,
-        'trainingFrequency': widget.trainingFrequency,
-        'target': widget.target,
-        'equipment': _selectedEquipment.toList(),
-      };
+      // Create profile entity with all collected data
+      final profile = UserProfile(
+        name: widget.name,
+        email: email,
+        age: widget.age,
+        sex: widget.sex,
+        trainingFrequency: widget.trainingFrequency,
+        target: widget.target,
+        equipment: _selectedEquipment.toList(),
+      );
 
-      // Call profile API
-      final result = await ProfileService.createProfile(profileData);
+      // Debug: Log the profile data being sent
+      print('DEBUG - Creating profile with:');
+      print('  target: ${widget.target}');
+      print('  trainingFrequency: ${widget.trainingFrequency}');
+      print('  equipment: ${_selectedEquipment.toList()}');
+
+      // Call profile repository
+      final result = await _profileRepository.createProfile(profile);
 
       if (!mounted) return;
 
-      if (result['success']) {
-        // Profile created successfully, navigate to dashboard
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const DashboardScreen()),
-          (route) => false,
-        );
-      } else {
-        // Show error
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(result['message'] ?? 'Failed to create profile'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      result.fold(
+        (failure) {
+          // Show error
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(failure.message),
+              backgroundColor: Colors.red,
+            ),
+          );
+        },
+        (createdProfile) {
+          // Profile created successfully, navigate to dashboard
+          context.go('/dashboard');
+        },
+      );
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -101,17 +121,11 @@ class _ProfileFormStep3ScreenState extends State<ProfileFormStep3Screen> {
   }
 
   Future<void> _logout() async {
-    await _authService.logout();
+    await _authRepository.logout();
 
     if (!mounted) return;
 
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const LoginScreen(title: 'FitPilot'),
-      ),
-      (route) => false,
-    );
+    context.go('/login');
   }
 
   @override

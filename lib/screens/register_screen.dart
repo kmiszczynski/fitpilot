@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
+import 'package:go_router/go_router.dart';
+import '../features/auth/data/datasources/auth_remote_datasource.dart';
+import '../features/auth/data/repositories/auth_repository_impl.dart';
+import '../features/auth/domain/repositories/auth_repository.dart';
+import '../core/utils/navigation_utils.dart';
 import '../widgets/app_logo.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/loading_button.dart';
 import '../constants/app_constants.dart';
-import 'email_confirm_screen.dart';
-import 'dashboard_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -19,8 +21,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  final _authService = AuthService();
+  late final AuthRepository _authRepository;
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _authRepository = AuthRepositoryImpl(AuthRemoteDataSourceImpl());
+  }
 
   @override
   void dispose() {
@@ -35,55 +43,33 @@ class _RegisterScreenState extends State<RegisterScreen> {
       setState(() => _isLoading = true);
 
       try {
-        final result = await _authService.register(
+        final result = await _authRepository.register(
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );
 
         if (!mounted) return;
 
-        if (result['success']) {
-          if (result['userConfirmed'] == false) {
-            // Navigate to email confirmation screen
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => EmailConfirmScreen(
-                  email: _emailController.text.trim(),
-                  password: _passwordController.text,
-                ),
-              ),
-            );
-          } else {
-            // Auto-login if already confirmed
-            await _autoLogin();
-          }
-        } else {
-          _showError(result['message']);
-        }
+        result.fold(
+          (failure) {
+            setState(() => _isLoading = false);
+            // If registration requires email confirmation, navigate to confirm screen
+            if (failure.message.contains('confirm')) {
+              context.go(
+                '/confirm-email?email=${Uri.encodeComponent(_emailController.text.trim())}&password=${Uri.encodeComponent(_passwordController.text)}',
+              );
+            } else {
+              _showError(failure.message);
+            }
+          },
+          (tokens) async {
+            // Auto-confirmed, check profile and navigate
+            await NavigationUtils.navigateAfterLogin(context);
+          },
+        );
       } finally {
         if (mounted) setState(() => _isLoading = false);
       }
-    }
-  }
-
-  Future<void> _autoLogin() async {
-    final loginResult = await _authService.login(
-      email: _emailController.text.trim(),
-      password: _passwordController.text,
-    );
-
-    if (!mounted) return;
-
-    if (loginResult['success']) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => const DashboardScreen()),
-        (route) => false,
-      );
-    } else {
-      _showWarning('Registration successful! Please log in. ${loginResult['message']}');
-      Navigator.pop(context);
     }
   }
 
@@ -93,15 +79,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  void _showWarning(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.orange),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.go('/login'),
+        ),
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -111,8 +97,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const AppLogo(),
-                const SizedBox(height: AppConstants.spacingXXLarge),
-
+                const SizedBox(height: AppConstants.spacingXLarge),
+                Text(
+                  'Create Account',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppConstants.spacingSmall),
+                Text(
+                  'Sign up to get started',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Colors.grey[600],
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppConstants.spacingXLarge),
                 Form(
                   key: _formKey,
                   child: Column(
@@ -136,12 +137,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const SizedBox(height: AppConstants.spacingMedium),
                       PasswordTextField(
                         controller: _passwordController,
+                        labelText: 'Password',
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter your password';
+                            return 'Please enter a password';
                           }
-                          if (value.length < AppConstants.passwordMinLength) {
-                            return 'Password must be at least ${AppConstants.passwordMinLength} characters';
+                          if (value.length < 8) {
+                            return 'Password must be at least 8 characters';
+                          }
+                          if (!value.contains(RegExp(r'[A-Z]'))) {
+                            return 'Password must contain at least one uppercase letter';
+                          }
+                          if (!value.contains(RegExp(r'[a-z]'))) {
+                            return 'Password must contain at least one lowercase letter';
+                          }
+                          if (!value.contains(RegExp(r'[0-9]'))) {
+                            return 'Password must contain at least one number';
+                          }
+                          if (!value.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) {
+                            return 'Password must contain at least one special character';
                           }
                           return null;
                         },
@@ -160,7 +174,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           return null;
                         },
                       ),
-                      const SizedBox(height: AppConstants.spacingLarge),
+                      const SizedBox(height: AppConstants.spacingXLarge),
                       LoadingButton(
                         label: 'Register',
                         onPressed: _register,
@@ -170,8 +184,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                 ),
                 const SizedBox(height: AppConstants.spacingLarge),
-
-                // Sign in link
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -180,7 +192,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       style: TextStyle(color: Colors.grey[600]),
                     ),
                     TextButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () => context.go('/login'),
                       child: const Text(
                         'Sign In',
                         style: TextStyle(fontWeight: FontWeight.bold),

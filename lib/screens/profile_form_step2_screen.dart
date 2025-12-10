@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../constants/app_constants.dart';
-import '../services/auth_service.dart';
-import 'login_screen.dart';
-import 'profile_form_step3_screen.dart';
+import '../features/auth/data/datasources/auth_remote_datasource.dart';
+import '../features/auth/data/repositories/auth_repository_impl.dart';
+import '../features/auth/domain/repositories/auth_repository.dart';
 
 class ProfileFormStep2Screen extends StatefulWidget {
   final String name;
@@ -21,44 +22,42 @@ class ProfileFormStep2Screen extends StatefulWidget {
 }
 
 class _ProfileFormStep2ScreenState extends State<ProfileFormStep2Screen> {
-  final _authService = AuthService();
+  late final AuthRepository _authRepository;
 
   int? _selectedTrainingFrequency;
   String? _selectedTarget;
+
+  @override
+  void initState() {
+    super.initState();
+    _authRepository = AuthRepositoryImpl(AuthRemoteDataSourceImpl());
+  }
 
   bool get _isFormValid =>
       _selectedTrainingFrequency != null && _selectedTarget != null;
 
   void _onContinue() {
     if (_isFormValid) {
-      // Navigate to step 3 with all collected data
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ProfileFormStep3Screen(
-            name: widget.name,
-            age: widget.age,
-            sex: widget.sex,
-            trainingFrequency: _selectedTrainingFrequency!,
-            target: _selectedTarget!,
-          ),
-        ),
+      // Navigate to step 3 with all collected data using GoRouter
+      context.goNamed(
+        'profileStep3',
+        extra: {
+          'name': widget.name,
+          'age': widget.age,
+          'sex': widget.sex,
+          'trainingFrequency': _selectedTrainingFrequency!,
+          'target': _selectedTarget!,
+        },
       );
     }
   }
 
   Future<void> _logout() async {
-    await _authService.logout();
+    await _authRepository.logout();
 
     if (!mounted) return;
 
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const LoginScreen(title: 'FitPilot'),
-      ),
-      (route) => false,
-    );
+    context.go('/login');
   }
 
   @override

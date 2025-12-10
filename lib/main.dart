@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
-import 'screens/splash_screen.dart';
+import 'core/router/app_router.dart';
+import 'core/theme/app_theme.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Hive for caching (if needed)
+  // await Hive.initFlutter();
+
   runApp(const MyApp());
 }
 
@@ -10,25 +16,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'FitPilot',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple,
-          brightness: Brightness.dark,
-        ).copyWith(
-          surface: const Color(0xFF1E1E1E),
-          background: const Color(0xFF1E1E1E),
-        ),
-        scaffoldBackgroundColor: const Color(0xFF1E1E1E),
-        useMaterial3: true,
-      ),
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.lightTheme(),
+      darkTheme: AppTheme.darkTheme(),
       themeMode: ThemeMode.system,
-      home: const SplashScreen(),
+      routerConfig: AppRouter.router,
     );
   }
 }

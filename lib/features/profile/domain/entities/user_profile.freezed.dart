@@ -20,17 +20,13 @@ UserProfile _$UserProfileFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$UserProfile {
-  String get id => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
+  String get email => throw _privateConstructorUsedError;
   int get age => throw _privateConstructorUsedError;
   String get sex => throw _privateConstructorUsedError;
-  double get height => throw _privateConstructorUsedError;
-  double get weight => throw _privateConstructorUsedError;
-  String get activityLevel => throw _privateConstructorUsedError;
-  String get goal => throw _privateConstructorUsedError;
-  String? get email => throw _privateConstructorUsedError;
-  DateTime? get createdAt => throw _privateConstructorUsedError;
-  DateTime? get updatedAt => throw _privateConstructorUsedError;
+  int get trainingFrequency => throw _privateConstructorUsedError;
+  String get target => throw _privateConstructorUsedError;
+  List<String> get equipment => throw _privateConstructorUsedError;
 
   /// Serializes this UserProfile to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -49,17 +45,13 @@ abstract class $UserProfileCopyWith<$Res> {
       _$UserProfileCopyWithImpl<$Res, UserProfile>;
   @useResult
   $Res call(
-      {String id,
-      String name,
+      {String name,
+      String email,
       int age,
       String sex,
-      double height,
-      double weight,
-      String activityLevel,
-      String goal,
-      String? email,
-      DateTime? createdAt,
-      DateTime? updatedAt});
+      int trainingFrequency,
+      String target,
+      List<String> equipment});
 }
 
 /// @nodoc
@@ -77,26 +69,22 @@ class _$UserProfileCopyWithImpl<$Res, $Val extends UserProfile>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = null,
     Object? name = null,
+    Object? email = null,
     Object? age = null,
     Object? sex = null,
-    Object? height = null,
-    Object? weight = null,
-    Object? activityLevel = null,
-    Object? goal = null,
-    Object? email = freezed,
-    Object? createdAt = freezed,
-    Object? updatedAt = freezed,
+    Object? trainingFrequency = null,
+    Object? target = null,
+    Object? equipment = null,
   }) {
     return _then(_value.copyWith(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
       name: null == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      email: null == email
+          ? _value.email
+          : email // ignore: cast_nullable_to_non_nullable
               as String,
       age: null == age
           ? _value.age
@@ -106,34 +94,18 @@ class _$UserProfileCopyWithImpl<$Res, $Val extends UserProfile>
           ? _value.sex
           : sex // ignore: cast_nullable_to_non_nullable
               as String,
-      height: null == height
-          ? _value.height
-          : height // ignore: cast_nullable_to_non_nullable
-              as double,
-      weight: null == weight
-          ? _value.weight
-          : weight // ignore: cast_nullable_to_non_nullable
-              as double,
-      activityLevel: null == activityLevel
-          ? _value.activityLevel
-          : activityLevel // ignore: cast_nullable_to_non_nullable
+      trainingFrequency: null == trainingFrequency
+          ? _value.trainingFrequency
+          : trainingFrequency // ignore: cast_nullable_to_non_nullable
+              as int,
+      target: null == target
+          ? _value.target
+          : target // ignore: cast_nullable_to_non_nullable
               as String,
-      goal: null == goal
-          ? _value.goal
-          : goal // ignore: cast_nullable_to_non_nullable
-              as String,
-      email: freezed == email
-          ? _value.email
-          : email // ignore: cast_nullable_to_non_nullable
-              as String?,
-      createdAt: freezed == createdAt
-          ? _value.createdAt
-          : createdAt // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-      updatedAt: freezed == updatedAt
-          ? _value.updatedAt
-          : updatedAt // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
+      equipment: null == equipment
+          ? _value.equipment
+          : equipment // ignore: cast_nullable_to_non_nullable
+              as List<String>,
     ) as $Val);
   }
 }
@@ -147,17 +119,13 @@ abstract class _$$UserProfileImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String id,
-      String name,
+      {String name,
+      String email,
       int age,
       String sex,
-      double height,
-      double weight,
-      String activityLevel,
-      String goal,
-      String? email,
-      DateTime? createdAt,
-      DateTime? updatedAt});
+      int trainingFrequency,
+      String target,
+      List<String> equipment});
 }
 
 /// @nodoc
@@ -173,26 +141,22 @@ class __$$UserProfileImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = null,
     Object? name = null,
+    Object? email = null,
     Object? age = null,
     Object? sex = null,
-    Object? height = null,
-    Object? weight = null,
-    Object? activityLevel = null,
-    Object? goal = null,
-    Object? email = freezed,
-    Object? createdAt = freezed,
-    Object? updatedAt = freezed,
+    Object? trainingFrequency = null,
+    Object? target = null,
+    Object? equipment = null,
   }) {
     return _then(_$UserProfileImpl(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
       name: null == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      email: null == email
+          ? _value.email
+          : email // ignore: cast_nullable_to_non_nullable
               as String,
       age: null == age
           ? _value.age
@@ -202,34 +166,18 @@ class __$$UserProfileImplCopyWithImpl<$Res>
           ? _value.sex
           : sex // ignore: cast_nullable_to_non_nullable
               as String,
-      height: null == height
-          ? _value.height
-          : height // ignore: cast_nullable_to_non_nullable
-              as double,
-      weight: null == weight
-          ? _value.weight
-          : weight // ignore: cast_nullable_to_non_nullable
-              as double,
-      activityLevel: null == activityLevel
-          ? _value.activityLevel
-          : activityLevel // ignore: cast_nullable_to_non_nullable
+      trainingFrequency: null == trainingFrequency
+          ? _value.trainingFrequency
+          : trainingFrequency // ignore: cast_nullable_to_non_nullable
+              as int,
+      target: null == target
+          ? _value.target
+          : target // ignore: cast_nullable_to_non_nullable
               as String,
-      goal: null == goal
-          ? _value.goal
-          : goal // ignore: cast_nullable_to_non_nullable
-              as String,
-      email: freezed == email
-          ? _value.email
-          : email // ignore: cast_nullable_to_non_nullable
-              as String?,
-      createdAt: freezed == createdAt
-          ? _value.createdAt
-          : createdAt // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-      updatedAt: freezed == updatedAt
-          ? _value.updatedAt
-          : updatedAt // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
+      equipment: null == equipment
+          ? _value._equipment
+          : equipment // ignore: cast_nullable_to_non_nullable
+              as List<String>,
     ));
   }
 }
@@ -238,47 +186,42 @@ class __$$UserProfileImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$UserProfileImpl implements _UserProfile {
   const _$UserProfileImpl(
-      {required this.id,
-      required this.name,
+      {required this.name,
+      required this.email,
       required this.age,
       required this.sex,
-      required this.height,
-      required this.weight,
-      required this.activityLevel,
-      required this.goal,
-      this.email,
-      this.createdAt,
-      this.updatedAt});
+      required this.trainingFrequency,
+      required this.target,
+      final List<String> equipment = const []})
+      : _equipment = equipment;
 
   factory _$UserProfileImpl.fromJson(Map<String, dynamic> json) =>
       _$$UserProfileImplFromJson(json);
 
   @override
-  final String id;
-  @override
   final String name;
+  @override
+  final String email;
   @override
   final int age;
   @override
   final String sex;
   @override
-  final double height;
+  final int trainingFrequency;
   @override
-  final double weight;
+  final String target;
+  final List<String> _equipment;
   @override
-  final String activityLevel;
-  @override
-  final String goal;
-  @override
-  final String? email;
-  @override
-  final DateTime? createdAt;
-  @override
-  final DateTime? updatedAt;
+  @JsonKey()
+  List<String> get equipment {
+    if (_equipment is EqualUnmodifiableListView) return _equipment;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_equipment);
+  }
 
   @override
   String toString() {
-    return 'UserProfile(id: $id, name: $name, age: $age, sex: $sex, height: $height, weight: $weight, activityLevel: $activityLevel, goal: $goal, email: $email, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'UserProfile(name: $name, email: $email, age: $age, sex: $sex, trainingFrequency: $trainingFrequency, target: $target, equipment: $equipment)';
   }
 
   @override
@@ -286,26 +229,28 @@ class _$UserProfileImpl implements _UserProfile {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$UserProfileImpl &&
-            (identical(other.id, id) || other.id == id) &&
             (identical(other.name, name) || other.name == name) &&
+            (identical(other.email, email) || other.email == email) &&
             (identical(other.age, age) || other.age == age) &&
             (identical(other.sex, sex) || other.sex == sex) &&
-            (identical(other.height, height) || other.height == height) &&
-            (identical(other.weight, weight) || other.weight == weight) &&
-            (identical(other.activityLevel, activityLevel) ||
-                other.activityLevel == activityLevel) &&
-            (identical(other.goal, goal) || other.goal == goal) &&
-            (identical(other.email, email) || other.email == email) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+            (identical(other.trainingFrequency, trainingFrequency) ||
+                other.trainingFrequency == trainingFrequency) &&
+            (identical(other.target, target) || other.target == target) &&
+            const DeepCollectionEquality()
+                .equals(other._equipment, _equipment));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, name, age, sex, height,
-      weight, activityLevel, goal, email, createdAt, updatedAt);
+  int get hashCode => Object.hash(
+      runtimeType,
+      name,
+      email,
+      age,
+      sex,
+      trainingFrequency,
+      target,
+      const DeepCollectionEquality().hash(_equipment));
 
   /// Create a copy of UserProfile
   /// with the given fields replaced by the non-null parameter values.
@@ -325,43 +270,31 @@ class _$UserProfileImpl implements _UserProfile {
 
 abstract class _UserProfile implements UserProfile {
   const factory _UserProfile(
-      {required final String id,
-      required final String name,
+      {required final String name,
+      required final String email,
       required final int age,
       required final String sex,
-      required final double height,
-      required final double weight,
-      required final String activityLevel,
-      required final String goal,
-      final String? email,
-      final DateTime? createdAt,
-      final DateTime? updatedAt}) = _$UserProfileImpl;
+      required final int trainingFrequency,
+      required final String target,
+      final List<String> equipment}) = _$UserProfileImpl;
 
   factory _UserProfile.fromJson(Map<String, dynamic> json) =
       _$UserProfileImpl.fromJson;
 
   @override
-  String get id;
-  @override
   String get name;
+  @override
+  String get email;
   @override
   int get age;
   @override
   String get sex;
   @override
-  double get height;
+  int get trainingFrequency;
   @override
-  double get weight;
+  String get target;
   @override
-  String get activityLevel;
-  @override
-  String get goal;
-  @override
-  String? get email;
-  @override
-  DateTime? get createdAt;
-  @override
-  DateTime? get updatedAt;
+  List<String> get equipment;
 
   /// Create a copy of UserProfile
   /// with the given fields replaced by the non-null parameter values.

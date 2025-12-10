@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
+import 'package:go_router/go_router.dart';
+import '../features/auth/data/datasources/auth_remote_datasource.dart';
+import '../features/auth/data/repositories/auth_repository_impl.dart';
+import '../features/auth/domain/repositories/auth_repository.dart';
+import '../core/utils/navigation_utils.dart';
 import '../widgets/app_logo.dart';
 import '../widgets/loading_button.dart';
 import '../constants/app_constants.dart';
-import '../utils/navigation_helper.dart';
 
 class EmailConfirmScreen extends StatefulWidget {
   final String email;
@@ -22,9 +25,15 @@ class EmailConfirmScreen extends StatefulWidget {
 class _EmailConfirmScreenState extends State<EmailConfirmScreen> {
   final _formKey = GlobalKey<FormState>();
   final _codeController = TextEditingController();
-  final _authService = AuthService();
+  late final AuthRepository _authRepository;
   bool _isLoading = false;
   bool _isResending = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _authRepository = AuthRepositoryImpl(AuthRemoteDataSourceImpl());
+  }
 
   @override
   void dispose() {
@@ -37,18 +46,23 @@ class _EmailConfirmScreenState extends State<EmailConfirmScreen> {
       setState(() => _isLoading = true);
 
       try {
-        final result = await _authService.confirmRegistration(
+        final result = await _authRepository.confirmRegistration(
           email: widget.email,
           confirmationCode: _codeController.text.trim(),
         );
 
         if (!mounted) return;
 
-        if (result['success']) {
-          await _autoLogin();
-        } else {
-          _showError(result['message']);
-        }
+        result.fold(
+          (failure) {
+            setState(() => _isLoading = false);
+            _showError(failure.message);
+          },
+          (message) async {
+            // Email confirmed, now auto-login
+            await _autoLogin();
+          },
+        );
       } finally {
         if (mounted) setState(() => _isLoading = false);
       }
@@ -56,35 +70,40 @@ class _EmailConfirmScreenState extends State<EmailConfirmScreen> {
   }
 
   Future<void> _autoLogin() async {
-    final loginResult = await _authService.login(
+    final loginResult = await _authRepository.login(
       email: widget.email,
       password: widget.password,
     );
 
     if (!mounted) return;
 
-    if (loginResult['success']) {
-      // Navigate after successful login (checks profile and navigates accordingly)
-      await NavigationHelper.navigateAfterLogin(context);
-    } else {
-      _showWarning('Email confirmed! Please log in. ${loginResult['message']}');
-      Navigator.popUntil(context, (route) => route.isFirst);
-    }
+    loginResult.fold(
+      (failure) {
+        _showWarning('Email confirmed! Please log in. ${failure.message}');
+        context.go('/login');
+      },
+      (tokens) async {
+        // Check profile and navigate appropriately
+        await NavigationUtils.navigateAfterLogin(context);
+      },
+    );
   }
 
   Future<void> _resendCode() async {
     setState(() => _isResending = true);
 
     try {
-      final result = await _authService.resendConfirmationCode(widget.email);
+      final result = await _authRepository.resendConfirmationCode(widget.email);
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(result['message']),
-          backgroundColor: result['success'] ? Colors.green : Colors.red,
-        ),
+      result.fold(
+        (failure) {
+          _showError(failure.message);
+        },
+        (message) {
+          _showSuccess(message);
+        },
       );
     } finally {
       if (mounted) setState(() => _isResending = false);
@@ -103,9 +122,21 @@ class _EmailConfirmScreenState extends State<EmailConfirmScreen> {
     );
   }
 
+  void _showSuccess(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.green),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.go('/login'),
+        ),
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -116,41 +147,22 @@ class _EmailConfirmScreenState extends State<EmailConfirmScreen> {
               children: [
                 const AppLogo(),
                 const SizedBox(height: AppConstants.spacingXLarge),
-
-                Icon(
-                  Icons.email_outlined,
-                  size: 64,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(height: AppConstants.spacingLarge),
-
                 Text(
-                  'Verify your email',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  'Confirm Your Email',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppConstants.spacingSmall),
-
                 Text(
-                  'We sent a confirmation code to',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  'We sent a confirmation code to\n${widget.email}',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: Colors.grey[600],
                       ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 4),
-
-                Text(
-                  widget.email,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                  textAlign: TextAlign.center,
-                ),
                 const SizedBox(height: AppConstants.spacingXLarge),
-
                 Form(
                   key: _formKey,
                   child: Column(
@@ -159,16 +171,16 @@ class _EmailConfirmScreenState extends State<EmailConfirmScreen> {
                       TextFormField(
                         controller: _codeController,
                         keyboardType: TextInputType.number,
+                        maxLength: AppConstants.confirmationCodeLength,
                         textAlign: TextAlign.center,
                         style: const TextStyle(
                           fontSize: 24,
-                          letterSpacing: 8,
                           fontWeight: FontWeight.bold,
+                          letterSpacing: 8,
                         ),
                         decoration: InputDecoration(
                           labelText: 'Confirmation Code',
                           hintText: '000000',
-                          prefixIcon: const Icon(Icons.pin_outlined),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(
                               AppConstants.borderRadiusMedium,
@@ -179,8 +191,8 @@ class _EmailConfirmScreenState extends State<EmailConfirmScreen> {
                           if (value == null || value.isEmpty) {
                             return 'Please enter the confirmation code';
                           }
-                          if (value.length < AppConstants.confirmationCodeLength) {
-                            return 'Code must be at least ${AppConstants.confirmationCodeLength} characters';
+                          if (value.length != AppConstants.confirmationCodeLength) {
+                            return 'Code must be ${AppConstants.confirmationCodeLength} digits';
                           }
                           return null;
                         },
@@ -191,33 +203,19 @@ class _EmailConfirmScreenState extends State<EmailConfirmScreen> {
                         onPressed: _confirmCode,
                         isLoading: _isLoading,
                       ),
+                      const SizedBox(height: AppConstants.spacingMedium),
+                      TextButton(
+                        onPressed: _isResending ? null : _resendCode,
+                        child: _isResending
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Text('Resend Code'),
+                      ),
                     ],
                   ),
-                ),
-                const SizedBox(height: AppConstants.spacingLarge),
-
-                // Resend code
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Didn't receive the code? ",
-                      style: TextStyle(color: Colors.grey[600]),
-                    ),
-                    TextButton(
-                      onPressed: _isResending ? null : _resendCode,
-                      child: _isResending
-                          ? const SizedBox(
-                              height: 12,
-                              width: 12,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Text(
-                              'Resend',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                    ),
-                  ],
                 ),
               ],
             ),

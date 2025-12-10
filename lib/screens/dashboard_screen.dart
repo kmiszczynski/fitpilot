@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
+import 'package:go_router/go_router.dart';
 import '../constants/app_constants.dart';
-import 'login_screen.dart';
+import '../features/auth/data/datasources/auth_remote_datasource.dart';
+import '../features/auth/data/repositories/auth_repository_impl.dart';
+import '../features/auth/domain/repositories/auth_repository.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -11,20 +13,20 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  final _authService = AuthService();
+  late final AuthRepository _authRepository;
+
+  @override
+  void initState() {
+    super.initState();
+    _authRepository = AuthRepositoryImpl(AuthRemoteDataSourceImpl());
+  }
 
   Future<void> _logout() async {
-    await _authService.logout();
+    await _authRepository.logout();
 
     if (!mounted) return;
 
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const LoginScreen(title: 'FitPilot'),
-      ),
-      (route) => false,
-    );
+    context.go('/login');
   }
 
   @override
