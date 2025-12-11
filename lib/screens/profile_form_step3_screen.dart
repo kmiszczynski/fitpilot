@@ -209,7 +209,7 @@ class _ProfileFormStep3ScreenState extends State<ProfileFormStep3Screen> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Icon(
-                          Icons.home_repair_service,
+                          Icons.add_home_outlined,
                           size: 80,
                           color: Theme.of(context).colorScheme.primary,
                         ),
