@@ -44,7 +44,7 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
   void _onContinue() {
     if (_formKey.currentState!.validate() && _selectedSex != null) {
       // Navigate to step 2 with collected data
-      context.goNamed(
+      context.pushNamed(
         'profileStep2',
         extra: {
           'name': _nameController.text.trim(),

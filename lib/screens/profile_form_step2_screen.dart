@@ -39,7 +39,7 @@ class _ProfileFormStep2ScreenState extends State<ProfileFormStep2Screen> {
   void _onContinue() {
     if (_isFormValid) {
       // Navigate to step 3 with all collected data using GoRouter
-      context.goNamed(
+      context.pushNamed(
         'profileStep3',
         extra: {
           'name': widget.name,
@@ -66,6 +66,11 @@ class _ProfileFormStep2ScreenState extends State<ProfileFormStep2Screen> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Complete Your Profile'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          tooltip: 'Back',
+          onPressed: () => context.pop(),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
