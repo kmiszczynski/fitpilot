@@ -19,6 +19,7 @@ class _ExerciseListScreenState extends State<ExerciseListScreen> {
   List<Exercise>? _exercises;
   bool _isLoading = true;
   String? _errorMessage;
+  String? _selectedDifficulty; // null means "All"
 
   @override
   void initState() {
@@ -53,6 +54,16 @@ class _ExerciseListScreenState extends State<ExerciseListScreen> {
         });
       },
     );
+  }
+
+  List<Exercise> _getFilteredExercises() {
+    if (_exercises == null) return [];
+    if (_selectedDifficulty == null) return _exercises!;
+
+    return _exercises!
+        .where((exercise) =>
+            exercise.difficultyLevel.toLowerCase() == _selectedDifficulty!.toLowerCase())
+        .toList();
   }
 
   Color _getDifficultyColor(String difficulty) {
@@ -96,6 +107,56 @@ class _ExerciseListScreenState extends State<ExerciseListScreen> {
                 ],
               ),
             ),
+
+            // Difficulty Filter Chips
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppConstants.spacingLarge,
+              ),
+              child: Wrap(
+                spacing: AppConstants.spacingSmall,
+                runSpacing: AppConstants.spacingSmall,
+                children: [
+                  FilterChip(
+                    label: const Text('All'),
+                    selected: _selectedDifficulty == null,
+                    onSelected: (selected) {
+                      setState(() {
+                        _selectedDifficulty = null;
+                      });
+                    },
+                  ),
+                  FilterChip(
+                    label: const Text('Beginner'),
+                    selected: _selectedDifficulty?.toLowerCase() == 'beginner',
+                    onSelected: (selected) {
+                      setState(() {
+                        _selectedDifficulty = selected ? 'beginner' : null;
+                      });
+                    },
+                  ),
+                  FilterChip(
+                    label: const Text('Intermediate'),
+                    selected: _selectedDifficulty?.toLowerCase() == 'intermediate',
+                    onSelected: (selected) {
+                      setState(() {
+                        _selectedDifficulty = selected ? 'intermediate' : null;
+                      });
+                    },
+                  ),
+                  FilterChip(
+                    label: const Text('Advanced'),
+                    selected: _selectedDifficulty?.toLowerCase() == 'advanced',
+                    onSelected: (selected) {
+                      setState(() {
+                        _selectedDifficulty = selected ? 'advanced' : null;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppConstants.spacingMedium),
 
             // Exercise List
             Expanded(
@@ -141,43 +202,51 @@ class _ExerciseListScreenState extends State<ExerciseListScreen> {
                             ],
                           ),
                         )
-                      : _exercises == null || _exercises!.isEmpty
-                          ? Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.fitness_center,
-                                    size: 80,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .primary
-                                        .withOpacity(0.5),
-                                  ),
-                                  const SizedBox(
-                                      height: AppConstants.spacingLarge),
-                                  Text(
-                                    'No exercises available',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleLarge
-                                        ?.copyWith(
-                                          color: Colors.grey[600],
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                  ),
-                                ],
-                              ),
-                            )
-                          : RefreshIndicator(
+                      : Builder(
+                          builder: (context) {
+                            final filteredExercises = _getFilteredExercises();
+
+                            if (filteredExercises.isEmpty) {
+                              return Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.fitness_center,
+                                      size: 80,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .primary
+                                          .withOpacity(0.5),
+                                    ),
+                                    const SizedBox(
+                                        height: AppConstants.spacingLarge),
+                                    Text(
+                                      _selectedDifficulty == null
+                                          ? 'No exercises available'
+                                          : 'No ${_selectedDifficulty!.toLowerCase()} exercises found',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge
+                                          ?.copyWith(
+                                            color: Colors.grey[600],
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+
+                            return RefreshIndicator(
                               onRefresh: _loadExercises,
                               child: ListView.builder(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: AppConstants.spacingLarge,
                                 ),
-                                itemCount: _exercises!.length,
+                                itemCount: filteredExercises.length,
                                 itemBuilder: (context, index) {
-                                  final exercise = _exercises![index];
+                                  final exercise = filteredExercises[index];
                                   return _ExerciseListItem(
                                     exercise: exercise,
                                     difficultyColor:
@@ -194,7 +263,9 @@ class _ExerciseListScreenState extends State<ExerciseListScreen> {
                                   );
                                 },
                               ),
-                            ),
+                            );
+                          },
+                        ),
             ),
           ],
         ),
