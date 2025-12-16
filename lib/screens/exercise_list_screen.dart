@@ -6,6 +6,7 @@ import '../features/exercises/data/datasources/exercise_remote_datasource.dart';
 import '../features/exercises/data/repositories/exercise_repository_impl.dart';
 import '../features/exercises/domain/entities/exercise.dart';
 import '../features/exercises/domain/repositories/exercise_repository.dart';
+import 'exercise_detail_screen.dart';
 
 class ExerciseListScreen extends StatefulWidget {
   const ExerciseListScreen({super.key});
@@ -252,11 +253,12 @@ class _ExerciseListScreenState extends State<ExerciseListScreen> {
                                     difficultyColor:
                                         _getDifficultyColor(exercise.difficultyLevel),
                                     onTap: () {
-                                      // TODO: Navigate to exercise detail
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                              'Exercise details coming soon: ${exercise.name}'),
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => ExerciseDetailScreen(
+                                            exercise: exercise,
+                                          ),
                                         ),
                                       );
                                     },
