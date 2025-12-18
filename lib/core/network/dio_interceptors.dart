@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import '../../services/storage_service.dart';
+import '../../features/auth/data/datasources/auth_remote_datasource.dart';
 
 /// Logging interceptor for debugging API calls
 class LoggingInterceptor extends Interceptor {
@@ -69,38 +70,119 @@ class AuthInterceptor extends Interceptor {
 /// Error interceptor - handles token refresh on 401
 class ErrorInterceptor extends Interceptor {
   static bool _isRefreshing = false;
+  static final List<_RequestQueueItem> _requestQueue = [];
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     // Handle 401 Unauthorized - token refresh
-    if (err.response?.statusCode == 401 && !_isRefreshing) {
+    if (err.response?.statusCode == 401) {
+      final refreshToken = await StorageService.getRefreshToken();
+
+      // If no refresh token, let the error pass through (user needs to login)
+      if (refreshToken == null) {
+        if (kDebugMode) {
+          print('❌ No refresh token available. User needs to login.');
+        }
+        return super.onError(err, handler);
+      }
+
+      // If already refreshing, queue this request
+      if (_isRefreshing) {
+        if (kDebugMode) {
+          print('⏳ Token refresh in progress, queuing request...');
+        }
+        _requestQueue.add(_RequestQueueItem(err.requestOptions, handler));
+        return;
+      }
+
+      // Start refresh process
       _isRefreshing = true;
 
       try {
-        // Attempt to refresh token
-        final refreshToken = await StorageService.getRefreshToken();
+        if (kDebugMode) {
+          print('🔄 Attempting to refresh token...');
+        }
 
-        if (refreshToken != null) {
-          // Import AuthService lazily to avoid circular dependency
-          // Note: This is a simplified version. In production, you'd want
-          // a dedicated token refresh service.
+        // Refresh the token
+        final authDataSource = AuthRemoteDataSourceImpl();
+        final newTokens = await authDataSource.refreshToken();
+
+        if (kDebugMode) {
+          print('✅ Token refreshed successfully!');
+        }
+
+        // Retry the original request with new token
+        final options = err.requestOptions;
+        options.headers['Authorization'] = 'Bearer ${newTokens.idToken}';
+
+        // Create a new Dio instance to avoid interceptor loops
+        final dio = Dio();
+        final response = await dio.fetch(options);
+
+        // Resolve the original handler
+        handler.resolve(response);
+
+        // Process queued requests
+        if (_requestQueue.isNotEmpty) {
           if (kDebugMode) {
-            print('🔄 Attempting to refresh token...');
+            print('🔄 Processing ${_requestQueue.length} queued requests...');
           }
 
-          // TODO: Implement token refresh logic here
-          // For now, we'll let the error pass through
-          // You should call your auth service's refresh method here
+          final queueCopy = List<_RequestQueueItem>.from(_requestQueue);
+          _requestQueue.clear();
+
+          for (final item in queueCopy) {
+            try {
+              item.options.headers['Authorization'] =
+                  'Bearer ${newTokens.idToken}';
+              final queuedResponse = await dio.fetch(item.options);
+              item.handler.resolve(queuedResponse);
+            } catch (e) {
+              item.handler.reject(
+                DioException(
+                  requestOptions: item.options,
+                  error: e,
+                ),
+              );
+            }
+          }
         }
       } catch (e) {
         if (kDebugMode) {
           print('❌ Token refresh failed: $e');
         }
+
+        // Clear tokens on refresh failure
+        await StorageService.clearTokens();
+
+        // Reject the original request
+        handler.reject(err);
+
+        // Reject all queued requests
+        for (final item in _requestQueue) {
+          item.handler.reject(
+            DioException(
+              requestOptions: item.options,
+              error: 'Token refresh failed',
+            ),
+          );
+        }
+        _requestQueue.clear();
       } finally {
         _isRefreshing = false;
       }
+
+      return;
     }
 
     super.onError(err, handler);
   }
+}
+
+/// Helper class to queue requests during token refresh
+class _RequestQueueItem {
+  final RequestOptions options;
+  final ErrorInterceptorHandler handler;
+
+  _RequestQueueItem(this.options, this.handler);
 }

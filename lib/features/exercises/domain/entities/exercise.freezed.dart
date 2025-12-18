@@ -27,6 +27,7 @@ mixin _$Exercise {
   String get imageUrl => throw _privateConstructorUsedError;
   String get thumbnailImageUrl => throw _privateConstructorUsedError;
   String get instructions => throw _privateConstructorUsedError;
+  String? get instructionVideoUrl => throw _privateConstructorUsedError;
 
   /// Serializes this Exercise to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -50,7 +51,8 @@ abstract class $ExerciseCopyWith<$Res> {
       String difficultyLevel,
       String imageUrl,
       String thumbnailImageUrl,
-      String instructions});
+      String instructions,
+      String? instructionVideoUrl});
 }
 
 /// @nodoc
@@ -75,6 +77,7 @@ class _$ExerciseCopyWithImpl<$Res, $Val extends Exercise>
     Object? imageUrl = null,
     Object? thumbnailImageUrl = null,
     Object? instructions = null,
+    Object? instructionVideoUrl = freezed,
   }) {
     return _then(_value.copyWith(
       exerciseId: null == exerciseId
@@ -105,6 +108,10 @@ class _$ExerciseCopyWithImpl<$Res, $Val extends Exercise>
           ? _value.instructions
           : instructions // ignore: cast_nullable_to_non_nullable
               as String,
+      instructionVideoUrl: freezed == instructionVideoUrl
+          ? _value.instructionVideoUrl
+          : instructionVideoUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -124,7 +131,8 @@ abstract class _$$ExerciseImplCopyWith<$Res>
       String difficultyLevel,
       String imageUrl,
       String thumbnailImageUrl,
-      String instructions});
+      String instructions,
+      String? instructionVideoUrl});
 }
 
 /// @nodoc
@@ -147,6 +155,7 @@ class __$$ExerciseImplCopyWithImpl<$Res>
     Object? imageUrl = null,
     Object? thumbnailImageUrl = null,
     Object? instructions = null,
+    Object? instructionVideoUrl = freezed,
   }) {
     return _then(_$ExerciseImpl(
       exerciseId: null == exerciseId
@@ -177,6 +186,10 @@ class __$$ExerciseImplCopyWithImpl<$Res>
           ? _value.instructions
           : instructions // ignore: cast_nullable_to_non_nullable
               as String,
+      instructionVideoUrl: freezed == instructionVideoUrl
+          ? _value.instructionVideoUrl
+          : instructionVideoUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -191,7 +204,8 @@ class _$ExerciseImpl implements _Exercise {
       required this.difficultyLevel,
       required this.imageUrl,
       required this.thumbnailImageUrl,
-      required this.instructions});
+      required this.instructions,
+      this.instructionVideoUrl});
 
   factory _$ExerciseImpl.fromJson(Map<String, dynamic> json) =>
       _$$ExerciseImplFromJson(json);
@@ -210,10 +224,12 @@ class _$ExerciseImpl implements _Exercise {
   final String thumbnailImageUrl;
   @override
   final String instructions;
+  @override
+  final String? instructionVideoUrl;
 
   @override
   String toString() {
-    return 'Exercise(exerciseId: $exerciseId, name: $name, description: $description, difficultyLevel: $difficultyLevel, imageUrl: $imageUrl, thumbnailImageUrl: $thumbnailImageUrl, instructions: $instructions)';
+    return 'Exercise(exerciseId: $exerciseId, name: $name, description: $description, difficultyLevel: $difficultyLevel, imageUrl: $imageUrl, thumbnailImageUrl: $thumbnailImageUrl, instructions: $instructions, instructionVideoUrl: $instructionVideoUrl)';
   }
 
   @override
@@ -233,13 +249,23 @@ class _$ExerciseImpl implements _Exercise {
             (identical(other.thumbnailImageUrl, thumbnailImageUrl) ||
                 other.thumbnailImageUrl == thumbnailImageUrl) &&
             (identical(other.instructions, instructions) ||
-                other.instructions == instructions));
+                other.instructions == instructions) &&
+            (identical(other.instructionVideoUrl, instructionVideoUrl) ||
+                other.instructionVideoUrl == instructionVideoUrl));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, exerciseId, name, description,
-      difficultyLevel, imageUrl, thumbnailImageUrl, instructions);
+  int get hashCode => Object.hash(
+      runtimeType,
+      exerciseId,
+      name,
+      description,
+      difficultyLevel,
+      imageUrl,
+      thumbnailImageUrl,
+      instructions,
+      instructionVideoUrl);
 
   /// Create a copy of Exercise
   /// with the given fields replaced by the non-null parameter values.
@@ -265,7 +291,8 @@ abstract class _Exercise implements Exercise {
       required final String difficultyLevel,
       required final String imageUrl,
       required final String thumbnailImageUrl,
-      required final String instructions}) = _$ExerciseImpl;
+      required final String instructions,
+      final String? instructionVideoUrl}) = _$ExerciseImpl;
 
   factory _Exercise.fromJson(Map<String, dynamic> json) =
       _$ExerciseImpl.fromJson;
@@ -284,6 +311,8 @@ abstract class _Exercise implements Exercise {
   String get thumbnailImageUrl;
   @override
   String get instructions;
+  @override
+  String? get instructionVideoUrl;
 
   /// Create a copy of Exercise
   /// with the given fields replaced by the non-null parameter values.

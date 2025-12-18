@@ -13,6 +13,7 @@ class Exercise with _$Exercise {
     required String imageUrl,
     required String thumbnailImageUrl,
     required String instructions,
+    String? instructionVideoUrl,
   }) = _Exercise;
 
   factory Exercise.fromJson(Map<String, dynamic> json) =>

@@ -15,6 +15,7 @@ _$ExerciseModelImpl _$$ExerciseModelImplFromJson(Map<String, dynamic> json) =>
       imageUrl: json['imageUrl'] as String,
       thumbnailImageUrl: json['thumbnailImageUrl'] as String,
       instructions: json['instructions'] as String,
+      instructionVideoUrl: json['instructionVideoUrl'] as String?,
     );
 
 Map<String, dynamic> _$$ExerciseModelImplToJson(_$ExerciseModelImpl instance) =>
@@ -26,4 +27,5 @@ Map<String, dynamic> _$$ExerciseModelImplToJson(_$ExerciseModelImpl instance) =>
       'imageUrl': instance.imageUrl,
       'thumbnailImageUrl': instance.thumbnailImageUrl,
       'instructions': instance.instructions,
+      'instructionVideoUrl': instance.instructionVideoUrl,
     };

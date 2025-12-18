@@ -249,7 +249,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         throw AuthException(message: 'No refresh token found');
       }
 
-      // Try Cognito SDK refresh first
+      final userEmail = await StorageService.getUserEmail();
+
+      // Try Cognito SDK refresh first (only if we have the current user)
       if (_currentUser != null) {
         try {
           final session = await _currentUser!.refreshSession(
@@ -264,12 +266,45 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
               accessToken: newAccessToken!,
               idToken: newIdToken!,
               refreshToken: refreshToken,
+              email: userEmail,
             );
 
             await StorageService.saveTokens(
               accessToken: newAccessToken,
               idToken: newIdToken,
               refreshToken: refreshToken,
+              userEmail: userEmail,
+            );
+
+            return tokens;
+          }
+        } catch (e) {
+          // Fall through to OAuth refresh
+        }
+      } else if (userEmail != null) {
+        // If _currentUser is null but we have email, try to restore user session
+        try {
+          _currentUser = CognitoUser(userEmail, _userPool);
+          final session = await _currentUser!.refreshSession(
+            CognitoRefreshToken(refreshToken),
+          );
+
+          if (session != null) {
+            final newAccessToken = session.getAccessToken().getJwtToken();
+            final newIdToken = session.getIdToken().getJwtToken();
+
+            final tokens = AuthTokensModel(
+              accessToken: newAccessToken!,
+              idToken: newIdToken!,
+              refreshToken: refreshToken,
+              email: userEmail,
+            );
+
+            await StorageService.saveTokens(
+              accessToken: newAccessToken,
+              idToken: newIdToken,
+              refreshToken: refreshToken,
+              userEmail: userEmail,
             );
 
             return tokens;
@@ -279,7 +314,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         }
       }
 
-      // OAuth refresh
+      // OAuth refresh (fallback)
       final dio = Dio();
       final tokenEndpoint = '${AppConfig.cognitoDomain}/oauth2/token';
       final tokenResponse = await dio.post(
@@ -299,7 +334,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         final newAccessToken = tokenData['access_token'] as String;
         final newIdToken = tokenData['id_token'] as String;
 
-        final email = _extractEmailFromIdToken(newIdToken);
+        final email = _extractEmailFromIdToken(newIdToken) ?? userEmail;
 
         final tokens = AuthTokensModel(
           accessToken: newAccessToken,

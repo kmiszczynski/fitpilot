@@ -16,6 +16,7 @@ class ExerciseModel with _$ExerciseModel {
     required String imageUrl,
     required String thumbnailImageUrl,
     required String instructions,
+    String? instructionVideoUrl,
   }) = _ExerciseModel;
 
   factory ExerciseModel.fromJson(Map<String, dynamic> json) =>
@@ -31,6 +32,7 @@ class ExerciseModel with _$ExerciseModel {
       imageUrl: imageUrl,
       thumbnailImageUrl: thumbnailImageUrl,
       instructions: instructions,
+      instructionVideoUrl: instructionVideoUrl,
     );
   }
 
@@ -44,6 +46,7 @@ class ExerciseModel with _$ExerciseModel {
       imageUrl: entity.imageUrl,
       thumbnailImageUrl: entity.thumbnailImageUrl,
       instructions: entity.instructions,
+      instructionVideoUrl: entity.instructionVideoUrl,
     );
   }
 }

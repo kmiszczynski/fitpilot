@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../constants/app_constants.dart';
 import '../features/exercises/domain/entities/exercise.dart';
 import '../widgets/app_bottom_navigation_bar.dart';
+import '../widgets/exercise_video_player.dart';
 
 class ExerciseDetailScreen extends StatefulWidget {
   final Exercise exercise;
@@ -69,31 +70,36 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen>
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Exercise Image
-          CachedNetworkImage(
-            imageUrl: widget.exercise.imageUrl,
-            width: double.infinity,
-            height: 300,
-            fit: BoxFit.cover,
-            placeholder: (context, url) => Container(
+          // Exercise Instruction Video or Image
+          if (widget.exercise.instructionVideoUrl != null)
+            ExerciseVideoPlayer(
+              videoUrl: widget.exercise.instructionVideoUrl!,
+            )
+          else
+            CachedNetworkImage(
+              imageUrl: widget.exercise.imageUrl,
               width: double.infinity,
               height: 300,
-              color: Colors.grey[200],
-              child: const Center(
-                child: CircularProgressIndicator(),
+              fit: BoxFit.cover,
+              placeholder: (context, url) => Container(
+                width: double.infinity,
+                height: 300,
+                color: Colors.grey[200],
+                child: const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+              errorWidget: (context, url, error) => Container(
+                width: double.infinity,
+                height: 300,
+                color: Colors.grey[200],
+                child: Icon(
+                  Icons.fitness_center,
+                  color: Colors.grey[400],
+                  size: 80,
+                ),
               ),
             ),
-            errorWidget: (context, url, error) => Container(
-              width: double.infinity,
-              height: 300,
-              color: Colors.grey[200],
-              child: Icon(
-                Icons.fitness_center,
-                color: Colors.grey[400],
-                size: 80,
-              ),
-            ),
-          ),
 
           // Exercise Name and Difficulty
           Padding(
