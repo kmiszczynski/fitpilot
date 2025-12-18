@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants/app_constants.dart';
+import '../core/theme/app_theme.dart';
 
 class MyPlanScreen extends StatelessWidget {
   const MyPlanScreen({super.key});
@@ -24,7 +25,7 @@ class MyPlanScreen extends StatelessWidget {
               Text(
                 'Your personalized weekly workout schedule',
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Colors.grey[600],
+                      color: AppTheme.getMutedTextColor(context),
                     ),
               ),
               const SizedBox(height: AppConstants.spacingLarge),
@@ -63,12 +64,12 @@ class MyPlanScreen extends StatelessWidget {
                           _StatCard(
                             label: 'Completed',
                             value: '0',
-                            color: Colors.green,
+                            color: AppTheme.success,
                           ),
                           _StatCard(
                             label: 'Remaining',
                             value: '0',
-                            color: Colors.orange,
+                            color: AppTheme.warning,
                           ),
                           _StatCard(
                             label: 'Total',
@@ -108,7 +109,7 @@ class MyPlanScreen extends StatelessWidget {
                     Text(
                       'No training plan yet',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: Colors.grey[700],
+                            color: AppTheme.getMutedTextColor(context),
                             fontWeight: FontWeight.bold,
                           ),
                     ),
@@ -121,7 +122,7 @@ class MyPlanScreen extends StatelessWidget {
                       child: Text(
                         'Your personalized training plan will be generated based on your profile and goals',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Colors.grey[600],
+                              color: AppTheme.getMutedTextColor(context),
                             ),
                         textAlign: TextAlign.center,
                       ),
@@ -132,7 +133,12 @@ class MyPlanScreen extends StatelessWidget {
                       onPressed: () {
                         // TODO: Generate training plan
                       },
-                      icon: const Icon(Icons.auto_awesome),
+                      icon: Icon(
+                        Icons.auto_awesome,
+                        color: Theme.of(context).brightness == Brightness.light
+                            ? Colors.white
+                            : Color(0xFF0A0E12),
+                      ),
                       label: const Text('Generate Plan'),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(
@@ -178,7 +184,7 @@ class _StatCard extends StatelessWidget {
         Text(
           label,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey[600],
+                color: AppTheme.getMutedTextColor(context),
               ),
         ),
       ],

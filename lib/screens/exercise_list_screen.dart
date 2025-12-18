@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../constants/app_constants.dart';
 import '../core/network/dio_client.dart';
+import '../core/theme/app_theme.dart';
 import '../features/exercises/data/datasources/exercise_remote_datasource.dart';
 import '../features/exercises/data/repositories/exercise_repository_impl.dart';
 import '../features/exercises/domain/entities/exercise.dart';
@@ -72,19 +73,6 @@ class _ExerciseListScreenState extends State<ExerciseListScreen> {
         .toList();
   }
 
-  Color _getDifficultyColor(String difficulty) {
-    switch (difficulty.toLowerCase()) {
-      case 'beginner':
-        return Colors.green;
-      case 'intermediate':
-        return Colors.orange;
-      case 'advanced':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -107,7 +95,7 @@ class _ExerciseListScreenState extends State<ExerciseListScreen> {
                   Text(
                     'All available exercises',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Colors.grey[600],
+                          color: AppTheme.getMutedTextColor(context),
                         ),
                   ),
                 ],
@@ -124,7 +112,14 @@ class _ExerciseListScreenState extends State<ExerciseListScreen> {
                 runSpacing: AppConstants.spacingSmall,
                 children: [
                   FilterChip(
-                    label: const Text('All'),
+                    label: Text(
+                      'All',
+                      style: TextStyle(
+                        color: _selectedDifficulty == null
+                            ? Theme.of(context).colorScheme.onPrimary
+                            : null,
+                      ),
+                    ),
                     selected: _selectedDifficulty == null,
                     onSelected: (selected) {
                       setState(() {
@@ -133,7 +128,14 @@ class _ExerciseListScreenState extends State<ExerciseListScreen> {
                     },
                   ),
                   FilterChip(
-                    label: const Text('Beginner'),
+                    label: Text(
+                      'Beginner',
+                      style: TextStyle(
+                        color: _selectedDifficulty?.toLowerCase() == 'beginner'
+                            ? Theme.of(context).colorScheme.onPrimary
+                            : null,
+                      ),
+                    ),
                     selected: _selectedDifficulty?.toLowerCase() == 'beginner',
                     onSelected: (selected) {
                       setState(() {
@@ -142,7 +144,14 @@ class _ExerciseListScreenState extends State<ExerciseListScreen> {
                     },
                   ),
                   FilterChip(
-                    label: const Text('Intermediate'),
+                    label: Text(
+                      'Intermediate',
+                      style: TextStyle(
+                        color: _selectedDifficulty?.toLowerCase() == 'intermediate'
+                            ? Theme.of(context).colorScheme.onPrimary
+                            : null,
+                      ),
+                    ),
                     selected: _selectedDifficulty?.toLowerCase() == 'intermediate',
                     onSelected: (selected) {
                       setState(() {
@@ -151,7 +160,14 @@ class _ExerciseListScreenState extends State<ExerciseListScreen> {
                     },
                   ),
                   FilterChip(
-                    label: const Text('Advanced'),
+                    label: Text(
+                      'Advanced',
+                      style: TextStyle(
+                        color: _selectedDifficulty?.toLowerCase() == 'advanced'
+                            ? Theme.of(context).colorScheme.onPrimary
+                            : null,
+                      ),
+                    ),
                     selected: _selectedDifficulty?.toLowerCase() == 'advanced',
                     onSelected: (selected) {
                       setState(() {
@@ -176,7 +192,7 @@ class _ExerciseListScreenState extends State<ExerciseListScreen> {
                               Icon(
                                 Icons.error_outline,
                                 size: 60,
-                                color: Colors.red[300],
+                                color: AppTheme.getErrorIconColor(context),
                               ),
                               const SizedBox(height: AppConstants.spacingMedium),
                               Text(
@@ -195,7 +211,7 @@ class _ExerciseListScreenState extends State<ExerciseListScreen> {
                                 ),
                                 child: Text(
                                   _errorMessage!,
-                                  style: TextStyle(color: Colors.grey[600]),
+                                  style: TextStyle(color: AppTheme.getMutedTextColor(context)),
                                   textAlign: TextAlign.center,
                                 ),
                               ),
@@ -235,7 +251,7 @@ class _ExerciseListScreenState extends State<ExerciseListScreen> {
                                           .textTheme
                                           .titleLarge
                                           ?.copyWith(
-                                            color: Colors.grey[600],
+                                            color: AppTheme.getMutedTextColor(context),
                                             fontWeight: FontWeight.bold,
                                           ),
                                     ),
@@ -256,7 +272,7 @@ class _ExerciseListScreenState extends State<ExerciseListScreen> {
                                   return _ExerciseListItem(
                                     exercise: exercise,
                                     difficultyColor:
-                                        _getDifficultyColor(exercise.difficultyLevel),
+                                        AppTheme.getDifficultyColor(exercise.difficultyLevel),
                                     onTap: () {
                                       Navigator.push(
                                         context,
@@ -320,7 +336,7 @@ class _ExerciseListItem extends StatelessWidget {
                       Container(
                         width: 80,
                         height: 80,
-                        color: Colors.grey[200],
+                        color: AppTheme.getPlaceholderColor(context),
                         child: const Center(
                           child: CircularProgressIndicator(strokeWidth: 2),
                         ),
@@ -329,10 +345,10 @@ class _ExerciseListItem extends StatelessWidget {
                       Container(
                         width: 80,
                         height: 80,
-                        color: Colors.grey[200],
+                        color: AppTheme.getPlaceholderColor(context),
                         child: Icon(
                           Icons.fitness_center,
-                          color: Colors.grey[400],
+                          color: AppTheme.getIconColor(context),
                           size: 32,
                         ),
                       ),
@@ -386,7 +402,7 @@ class _ExerciseListItem extends StatelessWidget {
               // Arrow Icon
               Icon(
                 Icons.chevron_right,
-                color: Colors.grey[400],
+                color: AppTheme.getIconColor(context),
               ),
             ],
           ),

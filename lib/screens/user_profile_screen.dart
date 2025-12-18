@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants/app_constants.dart';
+import '../core/theme/app_theme.dart';
 
 class UserProfileScreen extends StatelessWidget {
   const UserProfileScreen({super.key});
@@ -71,7 +72,7 @@ class UserProfileScreen extends StatelessWidget {
                 'Settings',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey[700],
+                      color: AppTheme.getMutedTextColor(context),
                     ),
               ),
               const SizedBox(height: AppConstants.spacingMedium),
@@ -122,7 +123,7 @@ class _ProfileInfoCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
         side: BorderSide(
-          color: Colors.grey[300]!,
+          color: AppTheme.getDividerColor(context),
           width: 1,
         ),
       ),
@@ -141,7 +142,7 @@ class _ProfileInfoCard extends StatelessWidget {
                 ),
                 child: Icon(
                   icon,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
                   size: 24,
                 ),
               ),
@@ -160,7 +161,7 @@ class _ProfileInfoCard extends StatelessWidget {
                     Text(
                       subtitle,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey[600],
+                            color: AppTheme.getMutedTextColor(context),
                           ),
                     ),
                   ],
@@ -168,7 +169,7 @@ class _ProfileInfoCard extends StatelessWidget {
               ),
               Icon(
                 Icons.chevron_right,
-                color: Colors.grey[400],
+                color: AppTheme.getIconColor(context),
               ),
             ],
           ),
