@@ -26,6 +26,7 @@ mixin _$ExerciseModel {
   String get difficultyLevel => throw _privateConstructorUsedError;
   String get imageUrl => throw _privateConstructorUsedError;
   String get thumbnailImageUrl => throw _privateConstructorUsedError;
+  String get instructions => throw _privateConstructorUsedError;
 
   /// Serializes this ExerciseModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -49,7 +50,8 @@ abstract class $ExerciseModelCopyWith<$Res> {
       String description,
       String difficultyLevel,
       String imageUrl,
-      String thumbnailImageUrl});
+      String thumbnailImageUrl,
+      String instructions});
 }
 
 /// @nodoc
@@ -73,6 +75,7 @@ class _$ExerciseModelCopyWithImpl<$Res, $Val extends ExerciseModel>
     Object? difficultyLevel = null,
     Object? imageUrl = null,
     Object? thumbnailImageUrl = null,
+    Object? instructions = null,
   }) {
     return _then(_value.copyWith(
       exerciseId: null == exerciseId
@@ -99,6 +102,10 @@ class _$ExerciseModelCopyWithImpl<$Res, $Val extends ExerciseModel>
           ? _value.thumbnailImageUrl
           : thumbnailImageUrl // ignore: cast_nullable_to_non_nullable
               as String,
+      instructions: null == instructions
+          ? _value.instructions
+          : instructions // ignore: cast_nullable_to_non_nullable
+              as String,
     ) as $Val);
   }
 }
@@ -117,7 +124,8 @@ abstract class _$$ExerciseModelImplCopyWith<$Res>
       String description,
       String difficultyLevel,
       String imageUrl,
-      String thumbnailImageUrl});
+      String thumbnailImageUrl,
+      String instructions});
 }
 
 /// @nodoc
@@ -139,6 +147,7 @@ class __$$ExerciseModelImplCopyWithImpl<$Res>
     Object? difficultyLevel = null,
     Object? imageUrl = null,
     Object? thumbnailImageUrl = null,
+    Object? instructions = null,
   }) {
     return _then(_$ExerciseModelImpl(
       exerciseId: null == exerciseId
@@ -165,6 +174,10 @@ class __$$ExerciseModelImplCopyWithImpl<$Res>
           ? _value.thumbnailImageUrl
           : thumbnailImageUrl // ignore: cast_nullable_to_non_nullable
               as String,
+      instructions: null == instructions
+          ? _value.instructions
+          : instructions // ignore: cast_nullable_to_non_nullable
+              as String,
     ));
   }
 }
@@ -178,7 +191,8 @@ class _$ExerciseModelImpl extends _ExerciseModel {
       required this.description,
       required this.difficultyLevel,
       required this.imageUrl,
-      required this.thumbnailImageUrl})
+      required this.thumbnailImageUrl,
+      required this.instructions})
       : super._();
 
   factory _$ExerciseModelImpl.fromJson(Map<String, dynamic> json) =>
@@ -196,10 +210,12 @@ class _$ExerciseModelImpl extends _ExerciseModel {
   final String imageUrl;
   @override
   final String thumbnailImageUrl;
+  @override
+  final String instructions;
 
   @override
   String toString() {
-    return 'ExerciseModel(exerciseId: $exerciseId, name: $name, description: $description, difficultyLevel: $difficultyLevel, imageUrl: $imageUrl, thumbnailImageUrl: $thumbnailImageUrl)';
+    return 'ExerciseModel(exerciseId: $exerciseId, name: $name, description: $description, difficultyLevel: $difficultyLevel, imageUrl: $imageUrl, thumbnailImageUrl: $thumbnailImageUrl, instructions: $instructions)';
   }
 
   @override
@@ -217,13 +233,15 @@ class _$ExerciseModelImpl extends _ExerciseModel {
             (identical(other.imageUrl, imageUrl) ||
                 other.imageUrl == imageUrl) &&
             (identical(other.thumbnailImageUrl, thumbnailImageUrl) ||
-                other.thumbnailImageUrl == thumbnailImageUrl));
+                other.thumbnailImageUrl == thumbnailImageUrl) &&
+            (identical(other.instructions, instructions) ||
+                other.instructions == instructions));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, exerciseId, name, description,
-      difficultyLevel, imageUrl, thumbnailImageUrl);
+      difficultyLevel, imageUrl, thumbnailImageUrl, instructions);
 
   /// Create a copy of ExerciseModel
   /// with the given fields replaced by the non-null parameter values.
@@ -248,7 +266,8 @@ abstract class _ExerciseModel extends ExerciseModel {
       required final String description,
       required final String difficultyLevel,
       required final String imageUrl,
-      required final String thumbnailImageUrl}) = _$ExerciseModelImpl;
+      required final String thumbnailImageUrl,
+      required final String instructions}) = _$ExerciseModelImpl;
   const _ExerciseModel._() : super._();
 
   factory _ExerciseModel.fromJson(Map<String, dynamic> json) =
@@ -266,6 +285,8 @@ abstract class _ExerciseModel extends ExerciseModel {
   String get imageUrl;
   @override
   String get thumbnailImageUrl;
+  @override
+  String get instructions;
 
   /// Create a copy of ExerciseModel
   /// with the given fields replaced by the non-null parameter values.

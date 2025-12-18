@@ -14,6 +14,7 @@ _$ExerciseImpl _$$ExerciseImplFromJson(Map<String, dynamic> json) =>
       difficultyLevel: json['difficultyLevel'] as String,
       imageUrl: json['imageUrl'] as String,
       thumbnailImageUrl: json['thumbnailImageUrl'] as String,
+      instructions: json['instructions'] as String,
     );
 
 Map<String, dynamic> _$$ExerciseImplToJson(_$ExerciseImpl instance) =>
@@ -24,4 +25,5 @@ Map<String, dynamic> _$$ExerciseImplToJson(_$ExerciseImpl instance) =>
       'difficultyLevel': instance.difficultyLevel,
       'imageUrl': instance.imageUrl,
       'thumbnailImageUrl': instance.thumbnailImageUrl,
+      'instructions': instance.instructions,
     };

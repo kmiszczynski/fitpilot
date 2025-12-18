@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../features/auth/data/datasources/auth_remote_datasource.dart';
 import '../features/auth/data/repositories/auth_repository_impl.dart';
 import '../features/auth/domain/repositories/auth_repository.dart';
+import '../widgets/app_bottom_navigation_bar.dart';
 import 'my_plan_screen.dart';
 import 'exercise_list_screen.dart';
 import 'user_profile_screen.dart';
@@ -18,10 +19,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   late final AuthRepository _authRepository;
   int _selectedIndex = 0;
 
-  final List<Widget> _screens = const [
-    MyPlanScreen(),
-    ExerciseListScreen(),
-    UserProfileScreen(),
+  List<Widget> get _screens => [
+    const MyPlanScreen(),
+    ExerciseListScreen(onTabChange: _onItemTapped),
+    const UserProfileScreen(),
   ];
 
   @override
@@ -72,23 +73,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ],
       ),
       body: _screens[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: AppBottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.event_note),
-            label: 'My Plan',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.format_list_bulleted_outlined),
-            label: 'Exercises',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
       ),
     );
   }

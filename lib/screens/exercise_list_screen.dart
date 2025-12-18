@@ -9,7 +9,12 @@ import '../features/exercises/domain/repositories/exercise_repository.dart';
 import 'exercise_detail_screen.dart';
 
 class ExerciseListScreen extends StatefulWidget {
-  const ExerciseListScreen({super.key});
+  final ValueChanged<int>? onTabChange;
+
+  const ExerciseListScreen({
+    super.key,
+    this.onTabChange,
+  });
 
   @override
   State<ExerciseListScreen> createState() => _ExerciseListScreenState();
@@ -258,6 +263,7 @@ class _ExerciseListScreenState extends State<ExerciseListScreen> {
                                         MaterialPageRoute(
                                           builder: (context) => ExerciseDetailScreen(
                                             exercise: exercise,
+                                            onTabChange: widget.onTabChange,
                                           ),
                                         ),
                                       );

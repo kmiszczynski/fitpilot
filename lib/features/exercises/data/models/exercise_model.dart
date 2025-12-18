@@ -15,6 +15,7 @@ class ExerciseModel with _$ExerciseModel {
     required String difficultyLevel,
     required String imageUrl,
     required String thumbnailImageUrl,
+    required String instructions,
   }) = _ExerciseModel;
 
   factory ExerciseModel.fromJson(Map<String, dynamic> json) =>
@@ -29,6 +30,7 @@ class ExerciseModel with _$ExerciseModel {
       difficultyLevel: difficultyLevel,
       imageUrl: imageUrl,
       thumbnailImageUrl: thumbnailImageUrl,
+      instructions: instructions,
     );
   }
 
@@ -41,6 +43,7 @@ class ExerciseModel with _$ExerciseModel {
       difficultyLevel: entity.difficultyLevel,
       imageUrl: entity.imageUrl,
       thumbnailImageUrl: entity.thumbnailImageUrl,
+      instructions: entity.instructions,
     );
   }
 }
