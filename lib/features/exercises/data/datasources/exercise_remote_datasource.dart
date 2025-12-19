@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import '../../../../core/network/dio_client.dart';
 import '../../../../core/error/exceptions.dart';
 import '../models/exercise_model.dart';
@@ -17,29 +18,58 @@ class ExerciseRemoteDataSourceImpl implements ExerciseRemoteDataSource {
   @override
   Future<List<ExerciseModel>> getExercises() async {
     try {
+      debugPrint('🌐 [DataSource] Calling GET /exercises...');
       final response = await _dioClient.get('/exercises');
 
       if (response.statusCode == 200) {
+        debugPrint('✅ [DataSource] Response received with status 200');
         final data = response.data as Map<String, dynamic>;
 
         // Check if response is successful
         if (data['success'] == true && data.containsKey('data')) {
+          debugPrint('✅ [DataSource] Response has success=true and data field');
           final exercisesData = data['data'] as Map<String, dynamic>;
 
           if (exercisesData.containsKey('exercises')) {
             final exercisesList = exercisesData['exercises'] as List<dynamic>;
+            debugPrint('✅ [DataSource] Found ${exercisesList.length} exercises in response');
 
-            return exercisesList
-                .map((json) => ExerciseModel.fromJson(json as Map<String, dynamic>))
-                .toList();
+            final List<ExerciseModel> models = [];
+            for (int i = 0; i < exercisesList.length; i++) {
+              try {
+                debugPrint('🔄 [DataSource] Parsing exercise $i...');
+                final json = exercisesList[i] as Map<String, dynamic>;
+                debugPrint('   Exercise data: $json');
+                final model = ExerciseModel.fromJson(json);
+                models.add(model);
+                debugPrint('✅ [DataSource] Successfully parsed exercise $i: ${model.name}');
+              } catch (e, stackTrace) {
+                debugPrint('');
+                debugPrint('🔴 [DataSource] Failed to parse exercise $i');
+                debugPrint('Exercise JSON: ${exercisesList[i]}');
+                debugPrint('Error: $e');
+                debugPrint('Stack trace:\n$stackTrace');
+                debugPrint('');
+                rethrow;
+              }
+            }
+
+            debugPrint('✅ [DataSource] Successfully parsed all ${models.length} exercises');
+            return models;
           }
         }
+
+        debugPrint('');
+        debugPrint('🔴 [DataSource] Invalid response format');
+        debugPrint('Response data: $data');
+        debugPrint('');
 
         throw ServerException(
           message: 'Invalid response format',
           statusCode: response.statusCode,
         );
       } else {
+        debugPrint('🔴 [DataSource] Non-200 status code: ${response.statusCode}');
         throw ServerException(
           message: 'Failed to fetch exercises',
           statusCode: response.statusCode,

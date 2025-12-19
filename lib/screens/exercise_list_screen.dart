@@ -38,6 +38,8 @@ class _ExerciseListScreenState extends State<ExerciseListScreen> {
   }
 
   Future<void> _loadExercises() async {
+    debugPrint('');
+    debugPrint('📱 [UI] Loading exercises...');
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -49,12 +51,22 @@ class _ExerciseListScreenState extends State<ExerciseListScreen> {
 
     result.fold(
       (failure) {
+        debugPrint('');
+        debugPrint('🔴 [UI] Exercise loading failed');
+        debugPrint('Failure type: ${failure.runtimeType}');
+        debugPrint('Failure message: ${failure.message}');
+        debugPrint('');
+
         setState(() {
           _isLoading = false;
           _errorMessage = failure.message;
         });
       },
       (exercises) {
+        debugPrint('');
+        debugPrint('✅ [UI] Successfully loaded ${exercises.length} exercises');
+        debugPrint('');
+
         setState(() {
           _isLoading = false;
           _exercises = exercises;
@@ -327,22 +339,32 @@ class _ExerciseListItem extends StatelessWidget {
               // Thumbnail Image
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: CachedNetworkImage(
-                  imageUrl: exercise.thumbnailImageUrl,
-                  width: 80,
-                  height: 80,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) =>
-                      Container(
+                child: exercise.thumbnailImageUrl != null
+                    ? CachedNetworkImage(
+                        imageUrl: exercise.thumbnailImageUrl!,
                         width: 80,
                         height: 80,
-                        color: AppTheme.getPlaceholderColor(context),
-                        child: const Center(
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(
+                          width: 80,
+                          height: 80,
+                          color: AppTheme.getPlaceholderColor(context),
+                          child: const Center(
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
                         ),
-                      ),
-                  errorWidget: (context, url, error) =>
-                      Container(
+                        errorWidget: (context, url, error) => Container(
+                          width: 80,
+                          height: 80,
+                          color: AppTheme.getPlaceholderColor(context),
+                          child: Icon(
+                            Icons.fitness_center,
+                            color: AppTheme.getIconColor(context),
+                            size: 32,
+                          ),
+                        ),
+                      )
+                    : Container(
                         width: 80,
                         height: 80,
                         color: AppTheme.getPlaceholderColor(context),
@@ -352,7 +374,6 @@ class _ExerciseListItem extends StatelessWidget {
                           size: 32,
                         ),
                       ),
-                ),
               ),
               const SizedBox(width: AppConstants.spacingMedium),
 

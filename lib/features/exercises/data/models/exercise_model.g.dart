@@ -12,8 +12,8 @@ _$ExerciseModelImpl _$$ExerciseModelImplFromJson(Map<String, dynamic> json) =>
       name: json['name'] as String,
       description: json['description'] as String,
       difficultyLevel: json['difficultyLevel'] as String,
-      imageUrl: json['imageUrl'] as String,
-      thumbnailImageUrl: json['thumbnailImageUrl'] as String,
+      imageUrl: json['imageUrl'] as String?,
+      thumbnailImageUrl: json['thumbnailImageUrl'] as String?,
       instructions: json['instructions'] as String,
       instructionVideoUrl: json['instructionVideoUrl'] as String?,
     );

@@ -24,8 +24,8 @@ mixin _$Exercise {
   String get name => throw _privateConstructorUsedError;
   String get description => throw _privateConstructorUsedError;
   String get difficultyLevel => throw _privateConstructorUsedError;
-  String get imageUrl => throw _privateConstructorUsedError;
-  String get thumbnailImageUrl => throw _privateConstructorUsedError;
+  String? get imageUrl => throw _privateConstructorUsedError;
+  String? get thumbnailImageUrl => throw _privateConstructorUsedError;
   String get instructions => throw _privateConstructorUsedError;
   String? get instructionVideoUrl => throw _privateConstructorUsedError;
 
@@ -49,8 +49,8 @@ abstract class $ExerciseCopyWith<$Res> {
       String name,
       String description,
       String difficultyLevel,
-      String imageUrl,
-      String thumbnailImageUrl,
+      String? imageUrl,
+      String? thumbnailImageUrl,
       String instructions,
       String? instructionVideoUrl});
 }
@@ -74,8 +74,8 @@ class _$ExerciseCopyWithImpl<$Res, $Val extends Exercise>
     Object? name = null,
     Object? description = null,
     Object? difficultyLevel = null,
-    Object? imageUrl = null,
-    Object? thumbnailImageUrl = null,
+    Object? imageUrl = freezed,
+    Object? thumbnailImageUrl = freezed,
     Object? instructions = null,
     Object? instructionVideoUrl = freezed,
   }) {
@@ -96,14 +96,14 @@ class _$ExerciseCopyWithImpl<$Res, $Val extends Exercise>
           ? _value.difficultyLevel
           : difficultyLevel // ignore: cast_nullable_to_non_nullable
               as String,
-      imageUrl: null == imageUrl
+      imageUrl: freezed == imageUrl
           ? _value.imageUrl
           : imageUrl // ignore: cast_nullable_to_non_nullable
-              as String,
-      thumbnailImageUrl: null == thumbnailImageUrl
+              as String?,
+      thumbnailImageUrl: freezed == thumbnailImageUrl
           ? _value.thumbnailImageUrl
           : thumbnailImageUrl // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       instructions: null == instructions
           ? _value.instructions
           : instructions // ignore: cast_nullable_to_non_nullable
@@ -129,8 +129,8 @@ abstract class _$$ExerciseImplCopyWith<$Res>
       String name,
       String description,
       String difficultyLevel,
-      String imageUrl,
-      String thumbnailImageUrl,
+      String? imageUrl,
+      String? thumbnailImageUrl,
       String instructions,
       String? instructionVideoUrl});
 }
@@ -152,8 +152,8 @@ class __$$ExerciseImplCopyWithImpl<$Res>
     Object? name = null,
     Object? description = null,
     Object? difficultyLevel = null,
-    Object? imageUrl = null,
-    Object? thumbnailImageUrl = null,
+    Object? imageUrl = freezed,
+    Object? thumbnailImageUrl = freezed,
     Object? instructions = null,
     Object? instructionVideoUrl = freezed,
   }) {
@@ -174,14 +174,14 @@ class __$$ExerciseImplCopyWithImpl<$Res>
           ? _value.difficultyLevel
           : difficultyLevel // ignore: cast_nullable_to_non_nullable
               as String,
-      imageUrl: null == imageUrl
+      imageUrl: freezed == imageUrl
           ? _value.imageUrl
           : imageUrl // ignore: cast_nullable_to_non_nullable
-              as String,
-      thumbnailImageUrl: null == thumbnailImageUrl
+              as String?,
+      thumbnailImageUrl: freezed == thumbnailImageUrl
           ? _value.thumbnailImageUrl
           : thumbnailImageUrl // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       instructions: null == instructions
           ? _value.instructions
           : instructions // ignore: cast_nullable_to_non_nullable
@@ -202,8 +202,8 @@ class _$ExerciseImpl implements _Exercise {
       required this.name,
       required this.description,
       required this.difficultyLevel,
-      required this.imageUrl,
-      required this.thumbnailImageUrl,
+      this.imageUrl,
+      this.thumbnailImageUrl,
       required this.instructions,
       this.instructionVideoUrl});
 
@@ -219,9 +219,9 @@ class _$ExerciseImpl implements _Exercise {
   @override
   final String difficultyLevel;
   @override
-  final String imageUrl;
+  final String? imageUrl;
   @override
-  final String thumbnailImageUrl;
+  final String? thumbnailImageUrl;
   @override
   final String instructions;
   @override
@@ -289,8 +289,8 @@ abstract class _Exercise implements Exercise {
       required final String name,
       required final String description,
       required final String difficultyLevel,
-      required final String imageUrl,
-      required final String thumbnailImageUrl,
+      final String? imageUrl,
+      final String? thumbnailImageUrl,
       required final String instructions,
       final String? instructionVideoUrl}) = _$ExerciseImpl;
 
@@ -306,9 +306,9 @@ abstract class _Exercise implements Exercise {
   @override
   String get difficultyLevel;
   @override
-  String get imageUrl;
+  String? get imageUrl;
   @override
-  String get thumbnailImageUrl;
+  String? get thumbnailImageUrl;
   @override
   String get instructions;
   @override

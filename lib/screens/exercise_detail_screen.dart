@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../constants/app_constants.dart';
+import '../core/theme/app_theme.dart';
 import '../features/exercises/domain/entities/exercise.dart';
 import '../widgets/app_bottom_navigation_bar.dart';
 import '../widgets/exercise_video_player.dart';
@@ -35,19 +36,6 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen>
     super.dispose();
   }
 
-  Color _getDifficultyColor(String difficulty) {
-    switch (difficulty.toLowerCase()) {
-      case 'beginner':
-        return Colors.green;
-      case 'intermediate':
-        return Colors.orange;
-      case 'advanced':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
-  }
-
   void _onBottomNavTapped(int index) {
     if (index == 1) {
       // Already on Exercises tab, just pop back
@@ -61,7 +49,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen>
 
   @override
   Widget build(BuildContext context) {
-    final difficultyColor = _getDifficultyColor(widget.exercise.difficultyLevel);
+    final difficultyColor = AppTheme.getDifficultyColor(widget.exercise.difficultyLevel);
 
     return Scaffold(
       appBar: AppBar(
@@ -75,16 +63,16 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen>
             ExerciseVideoPlayer(
               videoUrl: widget.exercise.instructionVideoUrl!,
             )
-          else
+          else if (widget.exercise.imageUrl != null)
             CachedNetworkImage(
-              imageUrl: widget.exercise.imageUrl,
+              imageUrl: widget.exercise.imageUrl!,
               width: double.infinity,
               height: 300,
               fit: BoxFit.cover,
               placeholder: (context, url) => Container(
                 width: double.infinity,
                 height: 300,
-                color: Colors.grey[200],
+                color: AppTheme.getPlaceholderColor(context),
                 child: const Center(
                   child: CircularProgressIndicator(),
                 ),
@@ -92,12 +80,23 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen>
               errorWidget: (context, url, error) => Container(
                 width: double.infinity,
                 height: 300,
-                color: Colors.grey[200],
+                color: AppTheme.getPlaceholderColor(context),
                 child: Icon(
                   Icons.fitness_center,
-                  color: Colors.grey[400],
+                  color: AppTheme.getIconColor(context),
                   size: 80,
                 ),
+              ),
+            )
+          else
+            Container(
+              width: double.infinity,
+              height: 300,
+              color: AppTheme.getPlaceholderColor(context),
+              child: Icon(
+                Icons.fitness_center,
+                color: AppTheme.getIconColor(context),
+                size: 80,
               ),
             ),
 
@@ -149,7 +148,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen>
           TabBar(
             controller: _tabController,
             labelColor: Theme.of(context).colorScheme.primary,
-            unselectedLabelColor: Colors.grey,
+            unselectedLabelColor: AppTheme.getMutedTextColor(context),
             indicatorColor: Theme.of(context).colorScheme.primary,
             tabs: const [
               Tab(text: 'Description'),
@@ -168,7 +167,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen>
                   child: Text(
                     widget.exercise.description,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Colors.grey[700],
+                          color: AppTheme.getMutedTextColor(context),
                           height: 1.5,
                         ),
                   ),
@@ -179,7 +178,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen>
                   child: Text(
                     widget.exercise.instructions,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Colors.grey[700],
+                          color: AppTheme.getMutedTextColor(context),
                           height: 1.5,
                         ),
                   ),

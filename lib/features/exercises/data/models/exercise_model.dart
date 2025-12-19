@@ -13,8 +13,8 @@ class ExerciseModel with _$ExerciseModel {
     required String name,
     required String description,
     required String difficultyLevel,
-    required String imageUrl,
-    required String thumbnailImageUrl,
+    String? imageUrl,
+    String? thumbnailImageUrl,
     required String instructions,
     String? instructionVideoUrl,
   }) = _ExerciseModel;
