@@ -22,11 +22,12 @@ ExerciseModel _$ExerciseModelFromJson(Map<String, dynamic> json) {
 mixin _$ExerciseModel {
   String get exerciseId => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
-  String get description => throw _privateConstructorUsedError;
   String get difficultyLevel => throw _privateConstructorUsedError;
+  String? get description => throw _privateConstructorUsedError;
   String? get imageUrl => throw _privateConstructorUsedError;
   String? get thumbnailImageUrl => throw _privateConstructorUsedError;
-  String get instructions => throw _privateConstructorUsedError;
+  String? get thumbnailImageUrlExpiration => throw _privateConstructorUsedError;
+  String? get instructions => throw _privateConstructorUsedError;
   String? get instructionVideoUrl => throw _privateConstructorUsedError;
 
   /// Serializes this ExerciseModel to a JSON map.
@@ -48,11 +49,12 @@ abstract class $ExerciseModelCopyWith<$Res> {
   $Res call(
       {String exerciseId,
       String name,
-      String description,
       String difficultyLevel,
+      String? description,
       String? imageUrl,
       String? thumbnailImageUrl,
-      String instructions,
+      String? thumbnailImageUrlExpiration,
+      String? instructions,
       String? instructionVideoUrl});
 }
 
@@ -73,11 +75,12 @@ class _$ExerciseModelCopyWithImpl<$Res, $Val extends ExerciseModel>
   $Res call({
     Object? exerciseId = null,
     Object? name = null,
-    Object? description = null,
     Object? difficultyLevel = null,
+    Object? description = freezed,
     Object? imageUrl = freezed,
     Object? thumbnailImageUrl = freezed,
-    Object? instructions = null,
+    Object? thumbnailImageUrlExpiration = freezed,
+    Object? instructions = freezed,
     Object? instructionVideoUrl = freezed,
   }) {
     return _then(_value.copyWith(
@@ -89,14 +92,14 @@ class _$ExerciseModelCopyWithImpl<$Res, $Val extends ExerciseModel>
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
-      description: null == description
-          ? _value.description
-          : description // ignore: cast_nullable_to_non_nullable
-              as String,
       difficultyLevel: null == difficultyLevel
           ? _value.difficultyLevel
           : difficultyLevel // ignore: cast_nullable_to_non_nullable
               as String,
+      description: freezed == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
+              as String?,
       imageUrl: freezed == imageUrl
           ? _value.imageUrl
           : imageUrl // ignore: cast_nullable_to_non_nullable
@@ -105,10 +108,14 @@ class _$ExerciseModelCopyWithImpl<$Res, $Val extends ExerciseModel>
           ? _value.thumbnailImageUrl
           : thumbnailImageUrl // ignore: cast_nullable_to_non_nullable
               as String?,
-      instructions: null == instructions
+      thumbnailImageUrlExpiration: freezed == thumbnailImageUrlExpiration
+          ? _value.thumbnailImageUrlExpiration
+          : thumbnailImageUrlExpiration // ignore: cast_nullable_to_non_nullable
+              as String?,
+      instructions: freezed == instructions
           ? _value.instructions
           : instructions // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       instructionVideoUrl: freezed == instructionVideoUrl
           ? _value.instructionVideoUrl
           : instructionVideoUrl // ignore: cast_nullable_to_non_nullable
@@ -128,11 +135,12 @@ abstract class _$$ExerciseModelImplCopyWith<$Res>
   $Res call(
       {String exerciseId,
       String name,
-      String description,
       String difficultyLevel,
+      String? description,
       String? imageUrl,
       String? thumbnailImageUrl,
-      String instructions,
+      String? thumbnailImageUrlExpiration,
+      String? instructions,
       String? instructionVideoUrl});
 }
 
@@ -151,11 +159,12 @@ class __$$ExerciseModelImplCopyWithImpl<$Res>
   $Res call({
     Object? exerciseId = null,
     Object? name = null,
-    Object? description = null,
     Object? difficultyLevel = null,
+    Object? description = freezed,
     Object? imageUrl = freezed,
     Object? thumbnailImageUrl = freezed,
-    Object? instructions = null,
+    Object? thumbnailImageUrlExpiration = freezed,
+    Object? instructions = freezed,
     Object? instructionVideoUrl = freezed,
   }) {
     return _then(_$ExerciseModelImpl(
@@ -167,14 +176,14 @@ class __$$ExerciseModelImplCopyWithImpl<$Res>
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
-      description: null == description
-          ? _value.description
-          : description // ignore: cast_nullable_to_non_nullable
-              as String,
       difficultyLevel: null == difficultyLevel
           ? _value.difficultyLevel
           : difficultyLevel // ignore: cast_nullable_to_non_nullable
               as String,
+      description: freezed == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
+              as String?,
       imageUrl: freezed == imageUrl
           ? _value.imageUrl
           : imageUrl // ignore: cast_nullable_to_non_nullable
@@ -183,10 +192,14 @@ class __$$ExerciseModelImplCopyWithImpl<$Res>
           ? _value.thumbnailImageUrl
           : thumbnailImageUrl // ignore: cast_nullable_to_non_nullable
               as String?,
-      instructions: null == instructions
+      thumbnailImageUrlExpiration: freezed == thumbnailImageUrlExpiration
+          ? _value.thumbnailImageUrlExpiration
+          : thumbnailImageUrlExpiration // ignore: cast_nullable_to_non_nullable
+              as String?,
+      instructions: freezed == instructions
           ? _value.instructions
           : instructions // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       instructionVideoUrl: freezed == instructionVideoUrl
           ? _value.instructionVideoUrl
           : instructionVideoUrl // ignore: cast_nullable_to_non_nullable
@@ -201,11 +214,12 @@ class _$ExerciseModelImpl extends _ExerciseModel {
   const _$ExerciseModelImpl(
       {required this.exerciseId,
       required this.name,
-      required this.description,
       required this.difficultyLevel,
+      this.description,
       this.imageUrl,
       this.thumbnailImageUrl,
-      required this.instructions,
+      this.thumbnailImageUrlExpiration,
+      this.instructions,
       this.instructionVideoUrl})
       : super._();
 
@@ -217,21 +231,23 @@ class _$ExerciseModelImpl extends _ExerciseModel {
   @override
   final String name;
   @override
-  final String description;
-  @override
   final String difficultyLevel;
+  @override
+  final String? description;
   @override
   final String? imageUrl;
   @override
   final String? thumbnailImageUrl;
   @override
-  final String instructions;
+  final String? thumbnailImageUrlExpiration;
+  @override
+  final String? instructions;
   @override
   final String? instructionVideoUrl;
 
   @override
   String toString() {
-    return 'ExerciseModel(exerciseId: $exerciseId, name: $name, description: $description, difficultyLevel: $difficultyLevel, imageUrl: $imageUrl, thumbnailImageUrl: $thumbnailImageUrl, instructions: $instructions, instructionVideoUrl: $instructionVideoUrl)';
+    return 'ExerciseModel(exerciseId: $exerciseId, name: $name, difficultyLevel: $difficultyLevel, description: $description, imageUrl: $imageUrl, thumbnailImageUrl: $thumbnailImageUrl, thumbnailImageUrlExpiration: $thumbnailImageUrlExpiration, instructions: $instructions, instructionVideoUrl: $instructionVideoUrl)';
   }
 
   @override
@@ -242,14 +258,18 @@ class _$ExerciseModelImpl extends _ExerciseModel {
             (identical(other.exerciseId, exerciseId) ||
                 other.exerciseId == exerciseId) &&
             (identical(other.name, name) || other.name == name) &&
-            (identical(other.description, description) ||
-                other.description == description) &&
             (identical(other.difficultyLevel, difficultyLevel) ||
                 other.difficultyLevel == difficultyLevel) &&
+            (identical(other.description, description) ||
+                other.description == description) &&
             (identical(other.imageUrl, imageUrl) ||
                 other.imageUrl == imageUrl) &&
             (identical(other.thumbnailImageUrl, thumbnailImageUrl) ||
                 other.thumbnailImageUrl == thumbnailImageUrl) &&
+            (identical(other.thumbnailImageUrlExpiration,
+                    thumbnailImageUrlExpiration) ||
+                other.thumbnailImageUrlExpiration ==
+                    thumbnailImageUrlExpiration) &&
             (identical(other.instructions, instructions) ||
                 other.instructions == instructions) &&
             (identical(other.instructionVideoUrl, instructionVideoUrl) ||
@@ -262,10 +282,11 @@ class _$ExerciseModelImpl extends _ExerciseModel {
       runtimeType,
       exerciseId,
       name,
-      description,
       difficultyLevel,
+      description,
       imageUrl,
       thumbnailImageUrl,
+      thumbnailImageUrlExpiration,
       instructions,
       instructionVideoUrl);
 
@@ -289,11 +310,12 @@ abstract class _ExerciseModel extends ExerciseModel {
   const factory _ExerciseModel(
       {required final String exerciseId,
       required final String name,
-      required final String description,
       required final String difficultyLevel,
+      final String? description,
       final String? imageUrl,
       final String? thumbnailImageUrl,
-      required final String instructions,
+      final String? thumbnailImageUrlExpiration,
+      final String? instructions,
       final String? instructionVideoUrl}) = _$ExerciseModelImpl;
   const _ExerciseModel._() : super._();
 
@@ -305,15 +327,17 @@ abstract class _ExerciseModel extends ExerciseModel {
   @override
   String get name;
   @override
-  String get description;
-  @override
   String get difficultyLevel;
+  @override
+  String? get description;
   @override
   String? get imageUrl;
   @override
   String? get thumbnailImageUrl;
   @override
-  String get instructions;
+  String? get thumbnailImageUrlExpiration;
+  @override
+  String? get instructions;
   @override
   String? get instructionVideoUrl;
 

@@ -8,11 +8,11 @@ class Exercise with _$Exercise {
   const factory Exercise({
     required String exerciseId,
     required String name,
-    required String description,
     required String difficultyLevel,
+    String? description,
     String? imageUrl,
     String? thumbnailImageUrl,
-    required String instructions,
+    String? instructions,
     String? instructionVideoUrl,
   }) = _Exercise;
 

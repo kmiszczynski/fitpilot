@@ -290,7 +290,7 @@ class _ExerciseListScreenState extends State<ExerciseListScreen> {
                                         context,
                                         MaterialPageRoute(
                                           builder: (context) => ExerciseDetailScreen(
-                                            exercise: exercise,
+                                            exerciseId: exercise.exerciseId,
                                             onTabChange: widget.onTabChange,
                                           ),
                                         ),

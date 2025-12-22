@@ -11,11 +11,12 @@ class ExerciseModel with _$ExerciseModel {
   const factory ExerciseModel({
     required String exerciseId,
     required String name,
-    required String description,
     required String difficultyLevel,
+    String? description,
     String? imageUrl,
     String? thumbnailImageUrl,
-    required String instructions,
+    String? thumbnailImageUrlExpiration,
+    String? instructions,
     String? instructionVideoUrl,
   }) = _ExerciseModel;
 

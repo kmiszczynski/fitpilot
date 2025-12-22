@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../constants/app_constants.dart';
+import '../core/network/dio_client.dart';
 import '../core/theme/app_theme.dart';
+import '../features/exercises/data/datasources/exercise_remote_datasource.dart';
+import '../features/exercises/data/repositories/exercise_repository_impl.dart';
 import '../features/exercises/domain/entities/exercise.dart';
+import '../features/exercises/domain/repositories/exercise_repository.dart';
 import '../widgets/app_bottom_navigation_bar.dart';
 import '../widgets/exercise_video_player.dart';
 
 class ExerciseDetailScreen extends StatefulWidget {
-  final Exercise exercise;
+  final String exerciseId;
   final ValueChanged<int>? onTabChange;
 
   const ExerciseDetailScreen({
     super.key,
-    required this.exercise,
+    required this.exerciseId,
     this.onTabChange,
   });
 
@@ -23,11 +27,57 @@ class ExerciseDetailScreen extends StatefulWidget {
 class _ExerciseDetailScreenState extends State<ExerciseDetailScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  late final ExerciseRepository _exerciseRepository;
+  Exercise? _exercise;
+  bool _isLoading = true;
+  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _exerciseRepository = ExerciseRepositoryImpl(
+      ExerciseRemoteDataSourceImpl(DioClient.instance),
+    );
+    _loadExerciseDetails();
+  }
+
+  Future<void> _loadExerciseDetails() async {
+    debugPrint('');
+    debugPrint('📱 [UI] Loading exercise details for ID: ${widget.exerciseId}...');
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    final result = await _exerciseRepository.getExerciseById(widget.exerciseId);
+
+    if (!mounted) return;
+
+    result.fold(
+      (failure) {
+        debugPrint('');
+        debugPrint('🔴 [UI] Exercise detail loading failed');
+        debugPrint('Failure type: ${failure.runtimeType}');
+        debugPrint('Failure message: ${failure.message}');
+        debugPrint('');
+
+        setState(() {
+          _isLoading = false;
+          _errorMessage = failure.message;
+        });
+      },
+      (exercise) {
+        debugPrint('');
+        debugPrint('✅ [UI] Successfully loaded exercise: ${exercise.name}');
+        debugPrint('');
+
+        setState(() {
+          _isLoading = false;
+          _exercise = exercise;
+        });
+      },
+    );
   }
 
   @override
@@ -49,23 +99,73 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen>
 
   @override
   Widget build(BuildContext context) {
-    final difficultyColor = AppTheme.getDifficultyColor(widget.exercise.difficultyLevel);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Exercise Details'),
       ),
-      body: Column(
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _errorMessage != null
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        size: 60,
+                        color: AppTheme.getErrorIconColor(context),
+                      ),
+                      const SizedBox(height: AppConstants.spacingMedium),
+                      Text(
+                        'Error loading exercise',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      const SizedBox(height: AppConstants.spacingSmall),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppConstants.spacingXLarge,
+                        ),
+                        child: Text(
+                          _errorMessage!,
+                          style: TextStyle(
+                              color: AppTheme.getMutedTextColor(context)),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      const SizedBox(height: AppConstants.spacingLarge),
+                      ElevatedButton.icon(
+                        onPressed: _loadExerciseDetails,
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                )
+              : _buildExerciseContent(),
+      bottomNavigationBar: AppBottomNavigationBar(
+        currentIndex: 1, // Exercises tab
+        onTap: _onBottomNavTapped,
+      ),
+    );
+  }
+
+  Widget _buildExerciseContent() {
+    final exercise = _exercise!;
+    final difficultyColor = AppTheme.getDifficultyColor(exercise.difficultyLevel);
+
+    return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Exercise Instruction Video or Image
-          if (widget.exercise.instructionVideoUrl != null)
+          if (exercise.instructionVideoUrl != null)
             ExerciseVideoPlayer(
-              videoUrl: widget.exercise.instructionVideoUrl!,
+              videoUrl: exercise.instructionVideoUrl!,
             )
-          else if (widget.exercise.imageUrl != null)
+          else if (exercise.imageUrl != null)
             CachedNetworkImage(
-              imageUrl: widget.exercise.imageUrl!,
+              imageUrl: exercise.imageUrl!,
               width: double.infinity,
               height: 300,
               fit: BoxFit.cover,
@@ -108,7 +208,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen>
               children: [
                 Expanded(
                   child: Text(
-                    widget.exercise.name,
+                    exercise.name,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -131,7 +231,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen>
                     ),
                   ),
                   child: Text(
-                    widget.exercise.difficultyLevel.toUpperCase(),
+                    exercise.difficultyLevel.toUpperCase(),
                     style: TextStyle(
                       color: difficultyColor,
                       fontSize: 12,
@@ -164,34 +264,47 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen>
                 // Description Tab
                 SingleChildScrollView(
                   padding: const EdgeInsets.all(AppConstants.spacingLarge),
-                  child: Text(
-                    widget.exercise.description,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: AppTheme.getMutedTextColor(context),
-                          height: 1.5,
+                  child: exercise.description != null
+                      ? Text(
+                          exercise.description!,
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                color: AppTheme.getMutedTextColor(context),
+                                height: 1.5,
+                              ),
+                        )
+                      : Center(
+                          child: Text(
+                            'No description available',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: AppTheme.getMutedTextColor(context),
+                                ),
+                          ),
                         ),
-                  ),
                 ),
                 // Instructions Tab
                 SingleChildScrollView(
                   padding: const EdgeInsets.all(AppConstants.spacingLarge),
-                  child: Text(
-                    widget.exercise.instructions,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: AppTheme.getMutedTextColor(context),
-                          height: 1.5,
+                  child: exercise.instructions != null
+                      ? Text(
+                          exercise.instructions!,
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                color: AppTheme.getMutedTextColor(context),
+                                height: 1.5,
+                              ),
+                        )
+                      : Center(
+                          child: Text(
+                            'No instructions available',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: AppTheme.getMutedTextColor(context),
+                                ),
+                          ),
                         ),
-                  ),
                 ),
               ],
             ),
           ),
         ],
-      ),
-      bottomNavigationBar: AppBottomNavigationBar(
-        currentIndex: 1, // Exercises tab
-        onTap: _onBottomNavTapped,
-      ),
-    );
+      );
   }
 }

@@ -8,6 +8,7 @@ import '../models/exercise_model.dart';
 /// Handles API calls for exercise operations
 abstract class ExerciseRemoteDataSource {
   Future<List<ExerciseModel>> getExercises();
+  Future<ExerciseModel> getExerciseById(String exerciseId);
 }
 
 class ExerciseRemoteDataSourceImpl implements ExerciseRemoteDataSource {
@@ -79,6 +80,90 @@ class ExerciseRemoteDataSourceImpl implements ExerciseRemoteDataSource {
       if (e.response != null) {
         final statusCode = e.response!.statusCode ?? 0;
         String message = 'Failed to fetch exercises';
+
+        if (e.response!.data is Map<String, dynamic>) {
+          final data = e.response!.data as Map<String, dynamic>;
+          if (data.containsKey('error')) {
+            message = data['error'].toString();
+          } else if (data.containsKey('message')) {
+            message = data['message'].toString();
+          }
+        }
+
+        throw ServerException(
+          message: message,
+          statusCode: statusCode,
+        );
+      } else {
+        throw NetworkException(
+          message: e.message ?? 'Network error occurred',
+        );
+      }
+    } on ServerException {
+      rethrow;
+    } on NetworkException {
+      rethrow;
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<ExerciseModel> getExerciseById(String exerciseId) async {
+    try {
+      debugPrint('🌐 [DataSource] Calling GET /exercises/$exerciseId...');
+      final response = await _dioClient.get('/exercises/$exerciseId');
+
+      if (response.statusCode == 200) {
+        debugPrint('✅ [DataSource] Response received with status 200');
+        final data = response.data as Map<String, dynamic>;
+
+        // Check if response is successful
+        if (data['success'] == true && data.containsKey('data')) {
+          debugPrint('✅ [DataSource] Response has success=true and data field');
+          final exerciseData = data['data'] as Map<String, dynamic>;
+
+          if (exerciseData.containsKey('exercise')) {
+            final exerciseJson = exerciseData['exercise'] as Map<String, dynamic>;
+            debugPrint('🔄 [DataSource] Parsing exercise details...');
+            debugPrint('   Exercise data: $exerciseJson');
+
+            try {
+              final model = ExerciseModel.fromJson(exerciseJson);
+              debugPrint('✅ [DataSource] Successfully parsed exercise: ${model.name}');
+              return model;
+            } catch (e, stackTrace) {
+              debugPrint('');
+              debugPrint('🔴 [DataSource] Failed to parse exercise details');
+              debugPrint('Exercise JSON: $exerciseJson');
+              debugPrint('Error: $e');
+              debugPrint('Stack trace:\n$stackTrace');
+              debugPrint('');
+              rethrow;
+            }
+          }
+        }
+
+        debugPrint('');
+        debugPrint('🔴 [DataSource] Invalid response format');
+        debugPrint('Response data: $data');
+        debugPrint('');
+
+        throw ServerException(
+          message: 'Invalid response format',
+          statusCode: response.statusCode,
+        );
+      } else {
+        debugPrint('🔴 [DataSource] Non-200 status code: ${response.statusCode}');
+        throw ServerException(
+          message: 'Failed to fetch exercise details',
+          statusCode: response.statusCode,
+        );
+      }
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final statusCode = e.response!.statusCode ?? 0;
+        String message = 'Failed to fetch exercise details';
 
         if (e.response!.data is Map<String, dynamic>) {
           final data = e.response!.data as Map<String, dynamic>;

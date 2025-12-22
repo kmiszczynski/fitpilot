@@ -54,4 +54,48 @@ class ExerciseRepositoryImpl implements ExerciseRepository {
       return Left(ServerFailure(message: e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, Exercise>> getExerciseById(String exerciseId) async {
+    try {
+      debugPrint('📦 [Repository] Fetching exercise by ID: $exerciseId...');
+      final exerciseModel = await remoteDataSource.getExerciseById(exerciseId);
+      debugPrint('📦 [Repository] Received exercise model: ${exerciseModel.name}');
+
+      debugPrint('📦 [Repository] Converting model to entity...');
+      final exercise = exerciseModel.toEntity();
+      debugPrint('✅ [Repository] Successfully converted exercise');
+
+      return Right(exercise);
+    } on ServerException catch (e, stackTrace) {
+      debugPrint('');
+      debugPrint('🔴 [Repository] ServerException caught');
+      debugPrint('Message: ${e.message}');
+      debugPrint('Status Code: ${e.statusCode}');
+      debugPrint('Stack trace:\n$stackTrace');
+      debugPrint('');
+
+      return Left(ServerFailure(
+        message: e.message,
+        statusCode: e.statusCode,
+      ));
+    } on NetworkException catch (e, stackTrace) {
+      debugPrint('');
+      debugPrint('🔴 [Repository] NetworkException caught');
+      debugPrint('Message: ${e.message}');
+      debugPrint('Stack trace:\n$stackTrace');
+      debugPrint('');
+
+      return Left(NetworkFailure(message: e.message));
+    } catch (e, stackTrace) {
+      debugPrint('');
+      debugPrint('🔴 [Repository] Unexpected error caught');
+      debugPrint('Error type: ${e.runtimeType}');
+      debugPrint('Error: $e');
+      debugPrint('Stack trace:\n$stackTrace');
+      debugPrint('');
+
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
 }
