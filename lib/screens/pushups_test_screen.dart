@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import '../constants/app_constants.dart';
 import '../core/network/dio_client.dart';
@@ -8,20 +7,22 @@ import '../features/exercises/data/repositories/exercise_repository_impl.dart';
 import '../features/exercises/domain/entities/exercise.dart';
 import '../features/exercises/domain/repositories/exercise_repository.dart';
 import '../widgets/exercise_video_player.dart';
-import 'pushups_test_screen.dart';
 
-class SquatTestScreen extends StatefulWidget {
-  const SquatTestScreen({super.key});
+class PushupsTestScreen extends StatefulWidget {
+  final int squatCount;
+
+  const PushupsTestScreen({
+    super.key,
+    required this.squatCount,
+  });
 
   @override
-  State<SquatTestScreen> createState() => _SquatTestScreenState();
+  State<PushupsTestScreen> createState() => _PushupsTestScreenState();
 }
 
-class _SquatTestScreenState extends State<SquatTestScreen> {
-  bool _isTimerRunning = false;
-  bool _isTimerFinished = false;
-  int _secondsRemaining = 60;
-  Timer? _timer;
+class _PushupsTestScreenState extends State<PushupsTestScreen> {
+  bool _hasStarted = false;
+  bool _isFinished = false;
 
   late final ExerciseRepository _exerciseRepository;
   Exercise? _exercise;
@@ -38,7 +39,7 @@ class _SquatTestScreenState extends State<SquatTestScreen> {
   }
 
   Future<void> _loadExerciseDetails() async {
-    final result = await _exerciseRepository.getExerciseById('squats');
+    final result = await _exerciseRepository.getExerciseById('pushups');
 
     if (!mounted) return;
 
@@ -58,105 +59,272 @@ class _SquatTestScreenState extends State<SquatTestScreen> {
     );
   }
 
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
+  void _startExercise() {
+    setState(() {
+      _hasStarted = true;
+      _isFinished = false;
+    });
   }
 
-  void _showSquatCountDialog() {
-    final TextEditingController controller = TextEditingController();
+  void _showPushupDetailsDialog() {
+    String? selectedType;
+    final TextEditingController repsController = TextEditingController();
+    String? errorMessage;
 
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
-        ),
-        title: Row(
-          children: [
-            Icon(
-              Icons.edit_note,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            const SizedBox(width: AppConstants.spacingSmall),
-            const Text('How many squats?'),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Enter the number of squats you completed:',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppTheme.getMutedTextColor(context),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
+          ),
+          title: Row(
+            children: [
+              Icon(
+                Icons.edit_note,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(width: AppConstants.spacingSmall),
+              const Text('Push-up details'),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+              Text(
+                'Select the type of push-ups you performed:',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppTheme.getMutedTextColor(context),
+                    ),
+              ),
+              const SizedBox(height: AppConstants.spacingMedium),
+
+              // Push-up type selection
+              _buildTypeOption(
+                context,
+                'Classic',
+                'Regular push-ups',
+                Icons.fitness_center,
+                selectedType == 'classic',
+                () {
+                  setDialogState(() {
+                    selectedType = 'classic';
+                    errorMessage = null; // Clear error when selection is made
+                  });
+                },
+              ),
+              const SizedBox(height: AppConstants.spacingSmall),
+              _buildTypeOption(
+                context,
+                'Knee',
+                'Push-ups on knees',
+                Icons.accessibility_new,
+                selectedType == 'knee',
+                () {
+                  setDialogState(() {
+                    selectedType = 'knee';
+                    errorMessage = null; // Clear error when selection is made
+                  });
+                },
+              ),
+              const SizedBox(height: AppConstants.spacingSmall),
+              _buildTypeOption(
+                context,
+                'Incline',
+                'Hands elevated',
+                Icons.trending_up,
+                selectedType == 'incline',
+                () {
+                  setDialogState(() {
+                    selectedType = 'incline';
+                    errorMessage = null; // Clear error when selection is made
+                  });
+                },
+              ),
+              const SizedBox(height: AppConstants.spacingSmall),
+              _buildTypeOption(
+                context,
+                'Wall',
+                'Against wall',
+                Icons.crop_portrait,
+                selectedType == 'wall',
+                () {
+                  setDialogState(() {
+                    selectedType = 'wall';
+                    errorMessage = null; // Clear error when selection is made
+                  });
+                },
+              ),
+
+              const SizedBox(height: AppConstants.spacingLarge),
+
+              // Error message
+              if (errorMessage != null)
+                Container(
+                  padding: const EdgeInsets.all(AppConstants.spacingMedium),
+                  margin: const EdgeInsets.only(bottom: AppConstants.spacingMedium),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.error.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.error.withOpacity(0.5),
+                    ),
                   ),
-            ),
-            const SizedBox(height: AppConstants.spacingLarge),
-            TextField(
-              controller: controller,
-              autofocus: true,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: 'Number of squats',
-                hintText: 'e.g., 25',
-                prefixIcon: Icon(
-                  Icons.numbers,
-                  color: Theme.of(context).colorScheme.primary,
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        color: Theme.of(context).colorScheme.error,
+                        size: 20,
+                      ),
+                      const SizedBox(width: AppConstants.spacingSmall),
+                      Expanded(
+                        child: Text(
+                          errorMessage!,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(
-                    AppConstants.borderRadiusMedium,
+
+              // Reps input
+              TextField(
+                controller: repsController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: 'Number of reps',
+                  hintText: 'e.g., 15',
+                  prefixIcon: Icon(
+                    Icons.numbers,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(
+                      AppConstants.borderRadiusMedium,
+                    ),
                   ),
                 ),
               ),
+            ],
+          ),
+        ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Cancel',
+                style: TextStyle(
+                  color: AppTheme.getMutedTextColor(context),
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final reps = int.tryParse(repsController.text);
+                if (selectedType == null) {
+                  setDialogState(() {
+                    errorMessage = 'Please select a push-up type';
+                  });
+                } else if (reps == null || reps < 0) {
+                  setDialogState(() {
+                    errorMessage = 'Please enter a valid number of reps';
+                  });
+                } else {
+                  Navigator.pop(context);
+                  _savePushupDetailsAndContinue(selectedType!, reps);
+                }
+              },
+              child: const Text('Continue'),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancel',
-              style: TextStyle(
-                color: AppTheme.getMutedTextColor(context),
-              ),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final count = int.tryParse(controller.text);
-              if (count != null && count >= 0) {
-                Navigator.pop(context);
-                _saveSquatCountAndContinue(count);
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Please enter a valid number'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-            },
-            child: const Text('Continue'),
-          ),
-        ],
       ),
     );
   }
 
-  Future<void> _saveSquatCountAndContinue(int count) async {
-    // TODO: Save to persistent storage (shared preferences or database)
-    debugPrint('💾 Saving squat count: $count');
+  Widget _buildTypeOption(
+    BuildContext context,
+    String title,
+    String subtitle,
+    IconData icon,
+    bool isSelected,
+    VoidCallback onTap,
+  ) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+      child: Container(
+        padding: const EdgeInsets.all(AppConstants.spacingMedium),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
+              : Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+          border: Border.all(
+            color: isSelected
+                ? Theme.of(context).colorScheme.primary
+                : AppTheme.getDividerColor(context),
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: isSelected
+                  ? Theme.of(context).colorScheme.primary
+                  : AppTheme.getIconColor(context),
+            ),
+            const SizedBox(width: AppConstants.spacingMedium),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          fontWeight:
+                              isSelected ? FontWeight.bold : FontWeight.normal,
+                        ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppTheme.getMutedTextColor(context),
+                        ),
+                  ),
+                ],
+              ),
+            ),
+            if (isSelected)
+              Icon(
+                Icons.check_circle,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _savePushupDetailsAndContinue(String type, int reps) async {
+    // TODO: Save to persistent storage along with squat count
+    debugPrint('💾 Saving fitness test data:');
+    debugPrint('   Squats: ${widget.squatCount}');
+    debugPrint('   Push-ups ($type): $reps');
 
     // Show success message
     if (!mounted) return;
 
-    final String message = count == 0
+    final String message = reps == 0
         ? 'Don\'t worry, everyone starts somewhere! Keep it up! 💪'
-        : 'Great job! You did $count squats 💪';
+        : 'Awesome! You did $reps $type push-ups 💪';
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -165,36 +333,16 @@ class _SquatTestScreenState extends State<SquatTestScreen> {
       ),
     );
 
-    // Navigate to push-ups test
-    await Future.delayed(const Duration(milliseconds: 800));
+    // Navigate to next exercise
+    // TODO: Navigate to next exercise screen (exercise 3 of 5)
+    await Future.delayed(const Duration(milliseconds: 500));
     if (!mounted) return;
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PushupsTestScreen(squatCount: count),
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Next exercise coming soon...'),
       ),
     );
-  }
-
-  void _startTimer() {
-    setState(() {
-      _isTimerRunning = true;
-      _secondsRemaining = 60;
-      _isTimerFinished = false;
-    });
-
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
-        if (_secondsRemaining > 0) {
-          _secondsRemaining--;
-        } else {
-          _timer?.cancel();
-          _isTimerRunning = false;
-          _isTimerFinished = true;
-        }
-      });
-    });
   }
 
   @override
@@ -214,7 +362,7 @@ class _SquatTestScreenState extends State<SquatTestScreen> {
                   children: [
                     // Progress indicator
                     Text(
-                      'Exercise 1 of 5',
+                      'Exercise 2 of 5',
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
                             color: Theme.of(context).colorScheme.primary,
                             fontWeight: FontWeight.bold,
@@ -224,7 +372,7 @@ class _SquatTestScreenState extends State<SquatTestScreen> {
 
                     // Exercise name
                     Text(
-                      'Squats',
+                      'Push-Ups',
                       style:
                           Theme.of(context).textTheme.headlineLarge?.copyWith(
                                 fontWeight: FontWeight.bold,
@@ -305,8 +453,8 @@ class _SquatTestScreenState extends State<SquatTestScreen> {
                         ),
                       ),
 
-                    // Timer Display (when running or finished)
-                    if (_isTimerRunning || _isTimerFinished)
+                    // In Progress Indicator
+                    if (_hasStarted && !_isFinished)
                       Center(
                         child: Container(
                           width: 200,
@@ -316,16 +464,12 @@ class _SquatTestScreenState extends State<SquatTestScreen> {
                           ),
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: _isTimerFinished
-                                ? AppTheme.success.withOpacity(0.1)
-                                : Theme.of(context)
-                                    .colorScheme
-                                    .primary
-                                    .withOpacity(0.1),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .primary
+                                .withOpacity(0.1),
                             border: Border.all(
-                              color: _isTimerFinished
-                                  ? AppTheme.success
-                                  : Theme.of(context).colorScheme.primary,
+                              color: Theme.of(context).colorScheme.primary,
                               width: 4,
                             ),
                           ),
@@ -333,51 +477,31 @@ class _SquatTestScreenState extends State<SquatTestScreen> {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                if (!_isTimerFinished) ...[
-                                  Text(
-                                    '$_secondsRemaining',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .displayLarge
-                                        ?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .primary,
-                                          fontSize: 72,
-                                        ),
-                                  ),
-                                  Text(
-                                    'seconds',
-                                    style:
-                                        Theme.of(context).textTheme.titleMedium,
-                                  ),
-                                ] else ...[
-                                  Icon(
-                                    Icons.check_circle,
-                                    size: 80,
-                                    color: AppTheme.success,
-                                  ),
-                                  const SizedBox(height: AppConstants.spacingSmall),
-                                  Text(
-                                    'Time\'s up!',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleLarge
-                                        ?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          color: AppTheme.success,
-                                        ),
-                                  ),
-                                ],
+                                Icon(
+                                  Icons.self_improvement,
+                                  size: 80,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                                const SizedBox(height: AppConstants.spacingSmall),
+                                Text(
+                                  'In progress...',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color:
+                                            Theme.of(context).colorScheme.primary,
+                                      ),
+                                ),
                               ],
                             ),
                           ),
                         ),
                       ),
 
-                    // Goal section
-                    if (!_isTimerRunning && !_isTimerFinished) ...[
+                    // Instructions (before start)
+                    if (!_hasStarted) ...[
                       _buildSectionTitle(context, 'Goal:'),
                       const SizedBox(height: AppConstants.spacingSmall),
                       RichText(
@@ -388,9 +512,9 @@ class _SquatTestScreenState extends State<SquatTestScreen> {
                               ),
                           children: [
                             const TextSpan(
-                                text: 'Perform as many squats as you can in '),
+                                text: 'Perform as many push-ups as you can with '),
                             TextSpan(
-                              text: '60 seconds',
+                              text: 'good form',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: Theme.of(context).colorScheme.primary,
@@ -406,25 +530,28 @@ class _SquatTestScreenState extends State<SquatTestScreen> {
                       _buildSectionTitle(context, 'How to do it:'),
                       const SizedBox(height: AppConstants.spacingMedium),
                       _buildInstructionItem(
-                          context, 'Stand with feet about shoulder-width apart'),
+                          context, 'Start in a plank position'),
                       _buildInstructionItem(
-                          context, 'Keep your chest up and back neutral'),
-                      _buildInstructionItem(
-                          context, 'Lower your hips down, then stand back up'),
-                      _buildInstructionItem(
-                          context, 'Move at a steady, controlled pace'),
+                          context, 'Keep your body in a straight line'),
+                      _buildInstructionItem(context,
+                          'Lower your chest toward the floor, then push back up'),
+                      _buildInstructionItem(context,
+                          'Choose the hardest variation you can perform safely'),
                       const SizedBox(height: AppConstants.spacingXLarge),
 
-                      // Tips section
-                      _buildSectionTitle(context, 'Tips:'),
+                      // Important section
+                      _buildSectionTitle(context, 'Important:'),
                       const SizedBox(height: AppConstants.spacingMedium),
-                      _buildTipCard(context, Icons.air, 'Breathe normally'),
+                      _buildTipCard(
+                          context,
+                          Icons.info_outline,
+                          'If you can\'t do a regular push-up, try knee, incline, or wall push-ups'),
                       const SizedBox(height: AppConstants.spacingSmall),
                       _buildTipCard(context, Icons.verified,
-                          'Focus on good form, not speed'),
+                          'Quality matters more than the number of reps'),
                       const SizedBox(height: AppConstants.spacingSmall),
                       _buildTipCard(context, Icons.warning_amber_outlined,
-                          'Stop if you feel pain or dizziness'),
+                          'Stop if you feel pain in your shoulders or wrists'),
                       const SizedBox(height: AppConstants.spacingXLarge),
 
                       // Ready section
@@ -448,36 +575,20 @@ class _SquatTestScreenState extends State<SquatTestScreen> {
                         child: Row(
                           children: [
                             Icon(
-                              Icons.timer,
+                              Icons.play_circle_outline,
                               color: Theme.of(context).colorScheme.tertiary,
                               size: 32,
                             ),
                             const SizedBox(width: AppConstants.spacingMedium),
                             Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'You\'ll have 60 seconds',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleMedium
-                                        ?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'Tap Start when you\'re ready',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(
-                                          color:
-                                              AppTheme.getMutedTextColor(context),
-                                        ),
-                                  ),
-                                ],
+                              child: Text(
+                                'Tap Start when you\'re ready',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
                               ),
                             ),
                           ],
@@ -509,11 +620,9 @@ class _SquatTestScreenState extends State<SquatTestScreen> {
                 child: SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: _isTimerRunning
-                        ? null
-                        : _isTimerFinished
-                            ? _showSquatCountDialog
-                            : _startTimer,
+                    onPressed: !_hasStarted
+                        ? _startExercise
+                        : _showPushupDetailsDialog,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                         vertical: AppConstants.spacingLarge,
@@ -523,38 +632,30 @@ class _SquatTestScreenState extends State<SquatTestScreen> {
                           AppConstants.borderRadiusLarge,
                         ),
                       ),
-                      backgroundColor: _isTimerFinished
-                          ? AppTheme.success
-                          : null,
+                      backgroundColor: _hasStarted ? AppTheme.success : null,
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        if (!_isTimerRunning && !_isTimerFinished)
+                        if (!_hasStarted)
                           Icon(
                             Icons.play_arrow,
                             color: Theme.of(context).brightness == Brightness.light
                                 ? Colors.white
                                 : Color(0xFF0A0E12),
                           ),
-                        if (_isTimerFinished)
+                        if (_hasStarted)
                           Icon(
                             Icons.check,
                             color: Colors.white,
                           ),
                         const SizedBox(width: AppConstants.spacingSmall),
                         Text(
-                          _isTimerRunning
-                              ? 'Timer running...'
-                              : _isTimerFinished
-                                  ? 'I\'m finished'
-                                  : 'Start',
+                          !_hasStarted ? 'Start' : 'I\'m finished',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: _isTimerFinished
-                                ? Colors.white
-                                : null,
+                            color: _hasStarted ? Colors.white : null,
                           ),
                         ),
                       ],
