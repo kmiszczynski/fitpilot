@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../constants/app_constants.dart';
 import '../core/theme/app_theme.dart';
+import 'squat_test_screen.dart';
 
 class FitnessTestIntroScreen extends StatelessWidget {
   const FitnessTestIntroScreen({super.key});
@@ -181,10 +182,10 @@ class FitnessTestIntroScreen extends StatelessWidget {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
-                      // TODO: Navigate to fitness test
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Starting fitness test...'),
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SquatTestScreen(),
                         ),
                       );
                     },
