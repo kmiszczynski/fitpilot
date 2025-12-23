@@ -66,6 +66,53 @@ class _PushupsTestScreenState extends State<PushupsTestScreen> {
     });
   }
 
+  void _showExitConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
+        ),
+        title: Row(
+          children: [
+            Icon(
+              Icons.warning_amber_rounded,
+              color: AppTheme.warning,
+            ),
+            const SizedBox(width: AppConstants.spacingSmall),
+            const Text('Exit fitness test?'),
+          ],
+        ),
+        content: Text(
+          'Your progress will not be saved.',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppTheme.getMutedTextColor(context),
+              ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context); // Close dialog
+              Navigator.pop(context); // Exit to squat test
+              Navigator.pop(context); // Exit to intro screen
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.warning,
+            ),
+            child: const Text(
+              'Exit Test',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showPushupDetailsDialog() {
     String? selectedType;
     final TextEditingController repsController = TextEditingController();
@@ -350,6 +397,13 @@ class _PushupsTestScreenState extends State<PushupsTestScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Fitness Test'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: _showExitConfirmationDialog,
+            tooltip: 'Exit test',
+          ),
+        ],
       ),
       body: SafeArea(
         child: Column(

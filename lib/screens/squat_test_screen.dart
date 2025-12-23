@@ -169,7 +169,7 @@ class _SquatTestScreenState extends State<SquatTestScreen> {
     await Future.delayed(const Duration(milliseconds: 800));
     if (!mounted) return;
 
-    Navigator.pushReplacement(
+    Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => PushupsTestScreen(squatCount: count),
@@ -197,11 +197,72 @@ class _SquatTestScreenState extends State<SquatTestScreen> {
     });
   }
 
+  void _stopTimer() {
+    _timer?.cancel();
+    setState(() {
+      _isTimerRunning = false;
+      _isTimerFinished = true;
+    });
+  }
+
+  void _showExitConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
+        ),
+        title: Row(
+          children: [
+            Icon(
+              Icons.warning_amber_rounded,
+              color: AppTheme.warning,
+            ),
+            const SizedBox(width: AppConstants.spacingSmall),
+            const Text('Exit fitness test?'),
+          ],
+        ),
+        content: Text(
+          'Your progress will not be saved.',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppTheme.getMutedTextColor(context),
+              ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context); // Close dialog
+              Navigator.pop(context); // Exit test screen
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.warning,
+            ),
+            child: const Text(
+              'Exit Test',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Fitness Test'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: _showExitConfirmationDialog,
+            tooltip: 'Exit test',
+          ),
+        ],
       ),
       body: SafeArea(
         child: Column(
@@ -510,7 +571,7 @@ class _SquatTestScreenState extends State<SquatTestScreen> {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: _isTimerRunning
-                        ? null
+                        ? _stopTimer
                         : _isTimerFinished
                             ? _showSquatCountDialog
                             : _startTimer,
@@ -525,7 +586,9 @@ class _SquatTestScreenState extends State<SquatTestScreen> {
                       ),
                       backgroundColor: _isTimerFinished
                           ? AppTheme.success
-                          : null,
+                          : _isTimerRunning
+                              ? AppTheme.warning
+                              : null,
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -537,6 +600,11 @@ class _SquatTestScreenState extends State<SquatTestScreen> {
                                 ? Colors.white
                                 : Color(0xFF0A0E12),
                           ),
+                        if (_isTimerRunning)
+                          Icon(
+                            Icons.stop,
+                            color: Colors.white,
+                          ),
                         if (_isTimerFinished)
                           Icon(
                             Icons.check,
@@ -545,14 +613,14 @@ class _SquatTestScreenState extends State<SquatTestScreen> {
                         const SizedBox(width: AppConstants.spacingSmall),
                         Text(
                           _isTimerRunning
-                              ? 'Timer running...'
+                              ? 'Stop early'
                               : _isTimerFinished
                                   ? 'I\'m finished'
                                   : 'Start',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: _isTimerFinished
+                            color: (_isTimerFinished || _isTimerRunning)
                                 ? Colors.white
                                 : null,
                           ),
