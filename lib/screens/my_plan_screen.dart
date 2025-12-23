@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../constants/app_constants.dart';
 import '../core/theme/app_theme.dart';
+import 'fitness_test_intro_screen.dart';
 
 class MyPlanScreen extends StatelessWidget {
   const MyPlanScreen({super.key});
@@ -131,7 +132,12 @@ class MyPlanScreen extends StatelessWidget {
 
                     ElevatedButton.icon(
                       onPressed: () {
-                        // TODO: Generate training plan
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const FitnessTestIntroScreen(),
+                          ),
+                        );
                       },
                       icon: Icon(
                         Icons.auto_awesome,
