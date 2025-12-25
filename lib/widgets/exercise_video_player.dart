@@ -132,89 +132,73 @@ class _ExerciseVideoPlayerState extends State<ExerciseVideoPlayer> {
   @override
   Widget build(BuildContext context) {
     if (_hasError) {
-      return Container(
-        width: double.infinity,
-        height: 300,
-        color: Colors.grey[200],
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              color: Colors.grey[400],
-              size: 60,
+      return AspectRatio(
+        aspectRatio: 16 / 9,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.black.withOpacity(0.03),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.error.withOpacity(0.2),
+              width: 1,
             ),
-            const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: Text(
-                _errorMessage ?? 'Failed to load video',
-                style: TextStyle(color: Colors.grey[600]),
-                textAlign: TextAlign.center,
+          ),
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.videocam_off_outlined,
+                    color: Theme.of(context).colorScheme.error.withOpacity(0.6),
+                    size: 40,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Video unavailable',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.error.withOpacity(0.8),
+                          fontWeight: FontWeight.w500,
+                        ),
+                  ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
       );
     }
 
     if (!_isInitialized) {
-      return Container(
-        width: double.infinity,
-        height: 300,
-        color: Colors.grey[200],
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const CircularProgressIndicator(),
-              const SizedBox(height: 16),
-              Text(
-                _isDownloading
-                    ? 'Downloading video...'
-                    : _isCached
-                        ? 'Loading from cache...'
-                        : 'Loading video...',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 14,
-                ),
+      return AspectRatio(
+        aspectRatio: 16 / 9, // Standard video aspect ratio
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.black.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Center(
+            child: Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                shape: BoxShape.circle,
               ),
-              if (_isCached)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.download_done,
-                        size: 16,
-                        color: Colors.green[600],
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Using cached version',
-                        style: TextStyle(
-                          color: Colors.green[600],
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              if (_isDownloading)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Text(
-                    'This may take a moment...',
-                    style: TextStyle(
-                      color: Colors.grey[500],
-                      fontSize: 11,
+              child: Center(
+                child: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Theme.of(context).colorScheme.primary,
                     ),
                   ),
                 ),
-            ],
+              ),
+            ),
           ),
         ),
       );
