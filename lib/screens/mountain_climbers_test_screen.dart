@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../constants/app_constants.dart';
 import '../core/network/dio_client.dart';
@@ -7,23 +8,34 @@ import '../features/exercises/data/repositories/exercise_repository_impl.dart';
 import '../features/exercises/domain/entities/exercise.dart';
 import '../features/exercises/domain/repositories/exercise_repository.dart';
 import '../widgets/exercise_video_player.dart';
-import 'reverse_snow_angels_test_screen.dart';
 
-class PushupsTestScreen extends StatefulWidget {
+class MountainClimbersTestScreen extends StatefulWidget {
   final int squatCount;
+  final String pushupType;
+  final int pushupCount;
+  final int reverseSnowAngelsCount;
+  final int plankTime;
 
-  const PushupsTestScreen({
+  const MountainClimbersTestScreen({
     super.key,
     required this.squatCount,
+    required this.pushupType,
+    required this.pushupCount,
+    required this.reverseSnowAngelsCount,
+    required this.plankTime,
   });
 
   @override
-  State<PushupsTestScreen> createState() => _PushupsTestScreenState();
+  State<MountainClimbersTestScreen> createState() =>
+      _MountainClimbersTestScreenState();
 }
 
-class _PushupsTestScreenState extends State<PushupsTestScreen> {
-  bool _hasStarted = false;
-  bool _isFinished = false;
+class _MountainClimbersTestScreenState
+    extends State<MountainClimbersTestScreen> {
+  bool _isTimerRunning = false;
+  bool _isTimerFinished = false;
+  int _secondsRemaining = 45;
+  Timer? _timer;
 
   late final ExerciseRepository _exerciseRepository;
   Exercise? _exercise;
@@ -40,7 +52,8 @@ class _PushupsTestScreenState extends State<PushupsTestScreen> {
   }
 
   Future<void> _loadExerciseDetails() async {
-    final result = await _exerciseRepository.getExerciseById('pushups');
+    final result =
+        await _exerciseRepository.getExerciseById('mountain_climbers');
 
     if (!mounted) return;
 
@@ -60,10 +73,155 @@ class _PushupsTestScreenState extends State<PushupsTestScreen> {
     );
   }
 
-  void _startExercise() {
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _showCountDialog() {
+    final TextEditingController controller = TextEditingController();
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
+        ),
+        title: Row(
+          children: [
+            Icon(
+              Icons.edit_note,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(width: AppConstants.spacingSmall),
+            const Text('How many reps?'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Enter the number of mountain climbers you completed:',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppTheme.getMutedTextColor(context),
+                  ),
+            ),
+            const SizedBox(height: AppConstants.spacingLarge),
+            TextField(
+              controller: controller,
+              autofocus: true,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: 'Number of reps',
+                hintText: 'e.g., 30',
+                prefixIcon: Icon(
+                  Icons.numbers,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(
+                    AppConstants.borderRadiusMedium,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                color: AppTheme.getMutedTextColor(context),
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final count = int.tryParse(controller.text);
+              if (count != null && count >= 0) {
+                Navigator.pop(context);
+                _saveCountAndFinish(count);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Please enter a valid number'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            child: const Text('Finish'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _saveCountAndFinish(int count) async {
+    // TODO: Save to persistent storage (shared preferences or database)
+    debugPrint('💾 Saving fitness test data:');
+    debugPrint('   Squats: ${widget.squatCount}');
+    debugPrint('   Push-ups (${widget.pushupType}): ${widget.pushupCount}');
+    debugPrint('   Reverse Snow Angels: ${widget.reverseSnowAngelsCount}');
+    debugPrint('   Plank: ${widget.plankTime} seconds');
+    debugPrint('   Mountain Climbers: $count');
+
+    // Show success message
+    if (!mounted) return;
+
+    final String message = count == 0
+        ? 'Don\'t worry, everyone starts somewhere! Keep it up! 💪'
+        : 'Congratulations! You completed the fitness test! 💪';
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: AppTheme.success,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+
+    // TODO: Navigate to completion/results screen
+    await Future.delayed(const Duration(milliseconds: 800));
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Fitness test completed! Results screen coming soon...'),
+      ),
+    );
+  }
+
+  void _startTimer() {
     setState(() {
-      _hasStarted = true;
-      _isFinished = false;
+      _isTimerRunning = true;
+      _secondsRemaining = 45;
+      _isTimerFinished = false;
+    });
+
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        if (_secondsRemaining > 0) {
+          _secondsRemaining--;
+        } else {
+          _timer?.cancel();
+          _isTimerRunning = false;
+          _isTimerFinished = true;
+        }
+      });
+    });
+  }
+
+  void _stopTimer() {
+    _timer?.cancel();
+    setState(() {
+      _isTimerRunning = false;
+      _isTimerFinished = true;
     });
   }
 
@@ -98,6 +256,9 @@ class _PushupsTestScreenState extends State<PushupsTestScreen> {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context); // Close dialog
+              Navigator.pop(context); // Exit to plank test
+              Navigator.pop(context); // Exit to reverse snow angels
+              Navigator.pop(context); // Exit to push-ups test
               Navigator.pop(context); // Exit to squat test
               Navigator.pop(context); // Exit to intro screen
             },
@@ -110,289 +271,6 @@ class _PushupsTestScreenState extends State<PushupsTestScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  void _showPushupDetailsDialog() {
-    String? selectedType;
-    final TextEditingController repsController = TextEditingController();
-    String? errorMessage;
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
-          ),
-          title: Row(
-            children: [
-              Icon(
-                Icons.edit_note,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              const SizedBox(width: AppConstants.spacingSmall),
-              const Text('Push-up details'),
-            ],
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-              Text(
-                'Select the type of push-ups you performed:',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppTheme.getMutedTextColor(context),
-                    ),
-              ),
-              const SizedBox(height: AppConstants.spacingMedium),
-
-              // Push-up type selection
-              _buildTypeOption(
-                context,
-                'Classic',
-                'Regular push-ups',
-                Icons.fitness_center,
-                selectedType == 'classic',
-                () {
-                  setDialogState(() {
-                    selectedType = 'classic';
-                    errorMessage = null; // Clear error when selection is made
-                  });
-                },
-              ),
-              const SizedBox(height: AppConstants.spacingSmall),
-              _buildTypeOption(
-                context,
-                'Knee',
-                'Push-ups on knees',
-                Icons.accessibility_new,
-                selectedType == 'knee',
-                () {
-                  setDialogState(() {
-                    selectedType = 'knee';
-                    errorMessage = null; // Clear error when selection is made
-                  });
-                },
-              ),
-              const SizedBox(height: AppConstants.spacingSmall),
-              _buildTypeOption(
-                context,
-                'Incline',
-                'Hands elevated',
-                Icons.trending_up,
-                selectedType == 'incline',
-                () {
-                  setDialogState(() {
-                    selectedType = 'incline';
-                    errorMessage = null; // Clear error when selection is made
-                  });
-                },
-              ),
-              const SizedBox(height: AppConstants.spacingSmall),
-              _buildTypeOption(
-                context,
-                'Wall',
-                'Against wall',
-                Icons.crop_portrait,
-                selectedType == 'wall',
-                () {
-                  setDialogState(() {
-                    selectedType = 'wall';
-                    errorMessage = null; // Clear error when selection is made
-                  });
-                },
-              ),
-
-              const SizedBox(height: AppConstants.spacingLarge),
-
-              // Error message
-              if (errorMessage != null)
-                Container(
-                  padding: const EdgeInsets.all(AppConstants.spacingMedium),
-                  margin: const EdgeInsets.only(bottom: AppConstants.spacingMedium),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.error.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
-                    border: Border.all(
-                      color: Theme.of(context).colorScheme.error.withOpacity(0.5),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.error_outline,
-                        color: Theme.of(context).colorScheme.error,
-                        size: 20,
-                      ),
-                      const SizedBox(width: AppConstants.spacingSmall),
-                      Expanded(
-                        child: Text(
-                          errorMessage!,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context).colorScheme.error,
-                              ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-              // Reps input
-              TextField(
-                controller: repsController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: 'Number of reps',
-                  hintText: 'e.g., 15',
-                  prefixIcon: Icon(
-                    Icons.numbers,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(
-                      AppConstants.borderRadiusMedium,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(
-                'Cancel',
-                style: TextStyle(
-                  color: AppTheme.getMutedTextColor(context),
-                ),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final reps = int.tryParse(repsController.text);
-                if (selectedType == null) {
-                  setDialogState(() {
-                    errorMessage = 'Please select a push-up type';
-                  });
-                } else if (reps == null || reps < 0) {
-                  setDialogState(() {
-                    errorMessage = 'Please enter a valid number of reps';
-                  });
-                } else {
-                  Navigator.pop(context);
-                  _savePushupDetailsAndContinue(selectedType!, reps);
-                }
-              },
-              child: const Text('Continue'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTypeOption(
-    BuildContext context,
-    String title,
-    String subtitle,
-    IconData icon,
-    bool isSelected,
-    VoidCallback onTap,
-  ) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
-      child: Container(
-        padding: const EdgeInsets.all(AppConstants.spacingMedium),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
-              : Theme.of(context).colorScheme.surface,
-          borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
-          border: Border.all(
-            color: isSelected
-                ? Theme.of(context).colorScheme.primary
-                : AppTheme.getDividerColor(context),
-            width: isSelected ? 2 : 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: isSelected
-                  ? Theme.of(context).colorScheme.primary
-                  : AppTheme.getIconColor(context),
-            ),
-            const SizedBox(width: AppConstants.spacingMedium),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          fontWeight:
-                              isSelected ? FontWeight.bold : FontWeight.normal,
-                        ),
-                  ),
-                  Text(
-                    subtitle,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppTheme.getMutedTextColor(context),
-                        ),
-                  ),
-                ],
-              ),
-            ),
-            if (isSelected)
-              Icon(
-                Icons.check_circle,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _savePushupDetailsAndContinue(String type, int reps) async {
-    // TODO: Save to persistent storage along with squat count
-    debugPrint('💾 Saving fitness test data:');
-    debugPrint('   Squats: ${widget.squatCount}');
-    debugPrint('   Push-ups ($type): $reps');
-
-    // Show success message
-    if (!mounted) return;
-
-    final String message = reps == 0
-        ? 'Don\'t worry, everyone starts somewhere! Keep it up! 💪'
-        : 'Awesome! You did $reps $type push-ups 💪';
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: AppTheme.success,
-      ),
-    );
-
-    // Navigate to reverse snow angels test
-    await Future.delayed(const Duration(milliseconds: 800));
-    if (!mounted) return;
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ReverseSnowAngelsTestScreen(
-          squatCount: widget.squatCount,
-          pushupType: type,
-          pushupCount: reps,
-        ),
       ),
     );
   }
@@ -421,7 +299,7 @@ class _PushupsTestScreenState extends State<PushupsTestScreen> {
                   children: [
                     // Progress indicator
                     Text(
-                      'Exercise 2 of 5',
+                      'Exercise 5 of 5',
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
                             color: Theme.of(context).colorScheme.primary,
                             fontWeight: FontWeight.bold,
@@ -431,7 +309,7 @@ class _PushupsTestScreenState extends State<PushupsTestScreen> {
 
                     // Exercise name
                     Text(
-                      'Push-Ups',
+                      'Mountain Climbers',
                       style:
                           Theme.of(context).textTheme.headlineLarge?.copyWith(
                                 fontWeight: FontWeight.bold,
@@ -512,8 +390,8 @@ class _PushupsTestScreenState extends State<PushupsTestScreen> {
                         ),
                       ),
 
-                    // In Progress Indicator
-                    if (_hasStarted && !_isFinished)
+                    // Timer Display (when running or finished)
+                    if (_isTimerRunning || _isTimerFinished)
                       Center(
                         child: Container(
                           width: 200,
@@ -523,12 +401,16 @@ class _PushupsTestScreenState extends State<PushupsTestScreen> {
                           ),
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .primary
-                                .withOpacity(0.1),
+                            color: _isTimerFinished
+                                ? AppTheme.success.withOpacity(0.1)
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withOpacity(0.1),
                             border: Border.all(
-                              color: Theme.of(context).colorScheme.primary,
+                              color: _isTimerFinished
+                                  ? AppTheme.success
+                                  : Theme.of(context).colorScheme.primary,
                               width: 4,
                             ),
                           ),
@@ -536,31 +418,51 @@ class _PushupsTestScreenState extends State<PushupsTestScreen> {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(
-                                  Icons.self_improvement,
-                                  size: 80,
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                                const SizedBox(height: AppConstants.spacingSmall),
-                                Text(
-                                  'In progress...',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleLarge
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        color:
-                                            Theme.of(context).colorScheme.primary,
-                                      ),
-                                ),
+                                if (!_isTimerFinished) ...[
+                                  Text(
+                                    '$_secondsRemaining',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .displayLarge
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                          fontSize: 72,
+                                        ),
+                                  ),
+                                  Text(
+                                    'seconds',
+                                    style:
+                                        Theme.of(context).textTheme.titleMedium,
+                                  ),
+                                ] else ...[
+                                  Icon(
+                                    Icons.check_circle,
+                                    size: 80,
+                                    color: AppTheme.success,
+                                  ),
+                                  const SizedBox(height: AppConstants.spacingSmall),
+                                  Text(
+                                    'Time\'s up!',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleLarge
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: AppTheme.success,
+                                        ),
+                                  ),
+                                ],
                               ],
                             ),
                           ),
                         ),
                       ),
 
-                    // Instructions (before start)
-                    if (!_hasStarted) ...[
+                    // Goal section
+                    if (!_isTimerRunning && !_isTimerFinished) ...[
                       _buildSectionTitle(context, 'Goal:'),
                       const SizedBox(height: AppConstants.spacingSmall),
                       RichText(
@@ -571,9 +473,10 @@ class _PushupsTestScreenState extends State<PushupsTestScreen> {
                               ),
                           children: [
                             const TextSpan(
-                                text: 'Perform as many push-ups as you can with '),
+                                text:
+                                    'Perform as many controlled repetitions as you can in '),
                             TextSpan(
-                              text: 'good form',
+                              text: '45 seconds',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: Theme.of(context).colorScheme.primary,
@@ -589,28 +492,26 @@ class _PushupsTestScreenState extends State<PushupsTestScreen> {
                       _buildSectionTitle(context, 'How to do it:'),
                       const SizedBox(height: AppConstants.spacingMedium),
                       _buildInstructionItem(
-                          context, 'Start in a plank position'),
+                          context, 'Start in a high plank position'),
                       _buildInstructionItem(
-                          context, 'Keep your body in a straight line'),
+                          context, 'Bring one knee toward your chest, then switch legs'),
+                      _buildInstructionItem(
+                          context, 'Keep your core engaged and hips stable'),
                       _buildInstructionItem(context,
-                          'Lower your chest toward the floor, then push back up'),
-                      _buildInstructionItem(context,
-                          'Choose the hardest variation you can perform safely'),
+                          'Move at a steady, controlled pace'),
                       const SizedBox(height: AppConstants.spacingXLarge),
 
-                      // Important section
-                      _buildSectionTitle(context, 'Important:'),
+                      // Tips section
+                      _buildSectionTitle(context, 'Tips:'),
                       const SizedBox(height: AppConstants.spacingMedium),
-                      _buildTipCard(
-                          context,
-                          Icons.info_outline,
-                          'If you can\'t do a regular push-up, try knee, incline, or wall push-ups'),
+                      _buildTipCard(context, Icons.speed,
+                          'Focus on control, not speed'),
                       const SizedBox(height: AppConstants.spacingSmall),
-                      _buildTipCard(context, Icons.verified,
-                          'Quality matters more than the number of reps'),
+                      _buildTipCard(context, Icons.air,
+                          'Breathe steadily'),
                       const SizedBox(height: AppConstants.spacingSmall),
                       _buildTipCard(context, Icons.warning_amber_outlined,
-                          'Stop if you feel pain in your shoulders or wrists'),
+                          'Stop if you feel pain or dizziness'),
                       const SizedBox(height: AppConstants.spacingXLarge),
 
                       // Ready section
@@ -634,20 +535,36 @@ class _PushupsTestScreenState extends State<PushupsTestScreen> {
                         child: Row(
                           children: [
                             Icon(
-                              Icons.play_circle_outline,
+                              Icons.timer,
                               color: Theme.of(context).colorScheme.tertiary,
                               size: 32,
                             ),
                             const SizedBox(width: AppConstants.spacingMedium),
                             Expanded(
-                              child: Text(
-                                'Tap Start when you\'re ready',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'You\'ll have 45 seconds',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Tap Start when you\'re ready',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                          color:
+                                              AppTheme.getMutedTextColor(context),
+                                        ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
@@ -679,9 +596,11 @@ class _PushupsTestScreenState extends State<PushupsTestScreen> {
                 child: SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: !_hasStarted
-                        ? _startExercise
-                        : _showPushupDetailsDialog,
+                    onPressed: _isTimerRunning
+                        ? _stopTimer
+                        : _isTimerFinished
+                            ? _showCountDialog
+                            : _startTimer,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                         vertical: AppConstants.spacingLarge,
@@ -691,30 +610,45 @@ class _PushupsTestScreenState extends State<PushupsTestScreen> {
                           AppConstants.borderRadiusLarge,
                         ),
                       ),
-                      backgroundColor: _hasStarted ? AppTheme.success : null,
+                      backgroundColor: _isTimerFinished
+                          ? AppTheme.success
+                          : _isTimerRunning
+                              ? AppTheme.warning
+                              : null,
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        if (!_hasStarted)
+                        if (!_isTimerRunning && !_isTimerFinished)
                           Icon(
                             Icons.play_arrow,
                             color: Theme.of(context).brightness == Brightness.light
                                 ? Colors.white
                                 : Color(0xFF0A0E12),
                           ),
-                        if (_hasStarted)
+                        if (_isTimerRunning)
+                          Icon(
+                            Icons.stop,
+                            color: Colors.white,
+                          ),
+                        if (_isTimerFinished)
                           Icon(
                             Icons.check,
                             color: Colors.white,
                           ),
                         const SizedBox(width: AppConstants.spacingSmall),
                         Text(
-                          !_hasStarted ? 'Start' : 'I\'m finished',
+                          _isTimerRunning
+                              ? 'Stop early'
+                              : _isTimerFinished
+                                  ? 'I\'m finished'
+                                  : 'Start',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: _hasStarted ? Colors.white : null,
+                            color: (_isTimerFinished || _isTimerRunning)
+                                ? Colors.white
+                                : null,
                           ),
                         ),
                       ],

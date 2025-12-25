@@ -7,21 +7,27 @@ import '../features/exercises/data/repositories/exercise_repository_impl.dart';
 import '../features/exercises/domain/entities/exercise.dart';
 import '../features/exercises/domain/repositories/exercise_repository.dart';
 import '../widgets/exercise_video_player.dart';
-import 'reverse_snow_angels_test_screen.dart';
+import 'mountain_climbers_test_screen.dart';
 
-class PushupsTestScreen extends StatefulWidget {
+class PlankTestScreen extends StatefulWidget {
   final int squatCount;
+  final String pushupType;
+  final int pushupCount;
+  final int reverseSnowAngelsCount;
 
-  const PushupsTestScreen({
+  const PlankTestScreen({
     super.key,
     required this.squatCount,
+    required this.pushupType,
+    required this.pushupCount,
+    required this.reverseSnowAngelsCount,
   });
 
   @override
-  State<PushupsTestScreen> createState() => _PushupsTestScreenState();
+  State<PlankTestScreen> createState() => _PlankTestScreenState();
 }
 
-class _PushupsTestScreenState extends State<PushupsTestScreen> {
+class _PlankTestScreenState extends State<PlankTestScreen> {
   bool _hasStarted = false;
   bool _isFinished = false;
 
@@ -40,7 +46,7 @@ class _PushupsTestScreenState extends State<PushupsTestScreen> {
   }
 
   Future<void> _loadExerciseDetails() async {
-    final result = await _exerciseRepository.getExerciseById('pushups');
+    final result = await _exerciseRepository.getExerciseById('plank');
 
     if (!mounted) return;
 
@@ -65,6 +71,175 @@ class _PushupsTestScreenState extends State<PushupsTestScreen> {
       _hasStarted = true;
       _isFinished = false;
     });
+  }
+
+  void _showTimeDialog() {
+    final TextEditingController controller = TextEditingController();
+    String? errorMessage;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
+          ),
+          title: Row(
+            children: [
+              Icon(
+                Icons.edit_note,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(width: AppConstants.spacingSmall),
+              const Text('How long?'),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Enter how many seconds you held the plank:',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppTheme.getMutedTextColor(context),
+                      ),
+                ),
+                const SizedBox(height: AppConstants.spacingLarge),
+
+                // Error message
+                if (errorMessage != null)
+                  Container(
+                    padding: const EdgeInsets.all(AppConstants.spacingMedium),
+                    margin:
+                        const EdgeInsets.only(bottom: AppConstants.spacingMedium),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.error.withOpacity(0.1),
+                      borderRadius:
+                          BorderRadius.circular(AppConstants.borderRadiusMedium),
+                      border: Border.all(
+                        color:
+                            Theme.of(context).colorScheme.error.withOpacity(0.5),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          color: Theme.of(context).colorScheme.error,
+                          size: 20,
+                        ),
+                        const SizedBox(width: AppConstants.spacingSmall),
+                        Expanded(
+                          child: Text(
+                            errorMessage!,
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: Theme.of(context).colorScheme.error,
+                                    ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                TextField(
+                  controller: controller,
+                  autofocus: true,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: 'Time in seconds',
+                    hintText: 'e.g., 45',
+                    prefixIcon: Icon(
+                      Icons.timer,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppConstants.borderRadiusMedium,
+                      ),
+                    ),
+                  ),
+                  onChanged: (value) {
+                    if (errorMessage != null) {
+                      setDialogState(() {
+                        errorMessage = null;
+                      });
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Cancel',
+                style: TextStyle(
+                  color: AppTheme.getMutedTextColor(context),
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final seconds = int.tryParse(controller.text);
+                if (seconds == null || seconds < 0) {
+                  setDialogState(() {
+                    errorMessage = 'Please enter a valid number of seconds';
+                  });
+                } else {
+                  Navigator.pop(context);
+                  _saveTimeAndContinue(seconds);
+                }
+              },
+              child: const Text('Continue'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _saveTimeAndContinue(int seconds) async {
+    // TODO: Save to persistent storage (shared preferences or database)
+    debugPrint('💾 Saving fitness test data:');
+    debugPrint('   Squats: ${widget.squatCount}');
+    debugPrint('   Push-ups (${widget.pushupType}): ${widget.pushupCount}');
+    debugPrint('   Reverse Snow Angels: ${widget.reverseSnowAngelsCount}');
+    debugPrint('   Plank: $seconds seconds');
+
+    // Show success message
+    if (!mounted) return;
+
+    final String message = seconds == 0
+        ? 'Don\'t worry, everyone starts somewhere! Keep it up! 💪'
+        : 'Great job! You held the plank for $seconds seconds 💪';
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: AppTheme.success,
+      ),
+    );
+
+    // Navigate to mountain climbers test
+    await Future.delayed(const Duration(milliseconds: 800));
+    if (!mounted) return;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MountainClimbersTestScreen(
+          squatCount: widget.squatCount,
+          pushupType: widget.pushupType,
+          pushupCount: widget.pushupCount,
+          reverseSnowAngelsCount: widget.reverseSnowAngelsCount,
+          plankTime: seconds,
+        ),
+      ),
+    );
   }
 
   void _showExitConfirmationDialog() {
@@ -98,6 +273,8 @@ class _PushupsTestScreenState extends State<PushupsTestScreen> {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context); // Close dialog
+              Navigator.pop(context); // Exit to reverse snow angels
+              Navigator.pop(context); // Exit to push-ups test
               Navigator.pop(context); // Exit to squat test
               Navigator.pop(context); // Exit to intro screen
             },
@@ -110,289 +287,6 @@ class _PushupsTestScreenState extends State<PushupsTestScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  void _showPushupDetailsDialog() {
-    String? selectedType;
-    final TextEditingController repsController = TextEditingController();
-    String? errorMessage;
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
-          ),
-          title: Row(
-            children: [
-              Icon(
-                Icons.edit_note,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              const SizedBox(width: AppConstants.spacingSmall),
-              const Text('Push-up details'),
-            ],
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-              Text(
-                'Select the type of push-ups you performed:',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppTheme.getMutedTextColor(context),
-                    ),
-              ),
-              const SizedBox(height: AppConstants.spacingMedium),
-
-              // Push-up type selection
-              _buildTypeOption(
-                context,
-                'Classic',
-                'Regular push-ups',
-                Icons.fitness_center,
-                selectedType == 'classic',
-                () {
-                  setDialogState(() {
-                    selectedType = 'classic';
-                    errorMessage = null; // Clear error when selection is made
-                  });
-                },
-              ),
-              const SizedBox(height: AppConstants.spacingSmall),
-              _buildTypeOption(
-                context,
-                'Knee',
-                'Push-ups on knees',
-                Icons.accessibility_new,
-                selectedType == 'knee',
-                () {
-                  setDialogState(() {
-                    selectedType = 'knee';
-                    errorMessage = null; // Clear error when selection is made
-                  });
-                },
-              ),
-              const SizedBox(height: AppConstants.spacingSmall),
-              _buildTypeOption(
-                context,
-                'Incline',
-                'Hands elevated',
-                Icons.trending_up,
-                selectedType == 'incline',
-                () {
-                  setDialogState(() {
-                    selectedType = 'incline';
-                    errorMessage = null; // Clear error when selection is made
-                  });
-                },
-              ),
-              const SizedBox(height: AppConstants.spacingSmall),
-              _buildTypeOption(
-                context,
-                'Wall',
-                'Against wall',
-                Icons.crop_portrait,
-                selectedType == 'wall',
-                () {
-                  setDialogState(() {
-                    selectedType = 'wall';
-                    errorMessage = null; // Clear error when selection is made
-                  });
-                },
-              ),
-
-              const SizedBox(height: AppConstants.spacingLarge),
-
-              // Error message
-              if (errorMessage != null)
-                Container(
-                  padding: const EdgeInsets.all(AppConstants.spacingMedium),
-                  margin: const EdgeInsets.only(bottom: AppConstants.spacingMedium),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.error.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
-                    border: Border.all(
-                      color: Theme.of(context).colorScheme.error.withOpacity(0.5),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.error_outline,
-                        color: Theme.of(context).colorScheme.error,
-                        size: 20,
-                      ),
-                      const SizedBox(width: AppConstants.spacingSmall),
-                      Expanded(
-                        child: Text(
-                          errorMessage!,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context).colorScheme.error,
-                              ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-              // Reps input
-              TextField(
-                controller: repsController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: 'Number of reps',
-                  hintText: 'e.g., 15',
-                  prefixIcon: Icon(
-                    Icons.numbers,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(
-                      AppConstants.borderRadiusMedium,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(
-                'Cancel',
-                style: TextStyle(
-                  color: AppTheme.getMutedTextColor(context),
-                ),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final reps = int.tryParse(repsController.text);
-                if (selectedType == null) {
-                  setDialogState(() {
-                    errorMessage = 'Please select a push-up type';
-                  });
-                } else if (reps == null || reps < 0) {
-                  setDialogState(() {
-                    errorMessage = 'Please enter a valid number of reps';
-                  });
-                } else {
-                  Navigator.pop(context);
-                  _savePushupDetailsAndContinue(selectedType!, reps);
-                }
-              },
-              child: const Text('Continue'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTypeOption(
-    BuildContext context,
-    String title,
-    String subtitle,
-    IconData icon,
-    bool isSelected,
-    VoidCallback onTap,
-  ) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
-      child: Container(
-        padding: const EdgeInsets.all(AppConstants.spacingMedium),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
-              : Theme.of(context).colorScheme.surface,
-          borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
-          border: Border.all(
-            color: isSelected
-                ? Theme.of(context).colorScheme.primary
-                : AppTheme.getDividerColor(context),
-            width: isSelected ? 2 : 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: isSelected
-                  ? Theme.of(context).colorScheme.primary
-                  : AppTheme.getIconColor(context),
-            ),
-            const SizedBox(width: AppConstants.spacingMedium),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          fontWeight:
-                              isSelected ? FontWeight.bold : FontWeight.normal,
-                        ),
-                  ),
-                  Text(
-                    subtitle,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppTheme.getMutedTextColor(context),
-                        ),
-                  ),
-                ],
-              ),
-            ),
-            if (isSelected)
-              Icon(
-                Icons.check_circle,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _savePushupDetailsAndContinue(String type, int reps) async {
-    // TODO: Save to persistent storage along with squat count
-    debugPrint('💾 Saving fitness test data:');
-    debugPrint('   Squats: ${widget.squatCount}');
-    debugPrint('   Push-ups ($type): $reps');
-
-    // Show success message
-    if (!mounted) return;
-
-    final String message = reps == 0
-        ? 'Don\'t worry, everyone starts somewhere! Keep it up! 💪'
-        : 'Awesome! You did $reps $type push-ups 💪';
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: AppTheme.success,
-      ),
-    );
-
-    // Navigate to reverse snow angels test
-    await Future.delayed(const Duration(milliseconds: 800));
-    if (!mounted) return;
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ReverseSnowAngelsTestScreen(
-          squatCount: widget.squatCount,
-          pushupType: type,
-          pushupCount: reps,
-        ),
       ),
     );
   }
@@ -421,7 +315,7 @@ class _PushupsTestScreenState extends State<PushupsTestScreen> {
                   children: [
                     // Progress indicator
                     Text(
-                      'Exercise 2 of 5',
+                      'Exercise 4 of 5',
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
                             color: Theme.of(context).colorScheme.primary,
                             fontWeight: FontWeight.bold,
@@ -431,7 +325,7 @@ class _PushupsTestScreenState extends State<PushupsTestScreen> {
 
                     // Exercise name
                     Text(
-                      'Push-Ups',
+                      'Plank',
                       style:
                           Theme.of(context).textTheme.headlineLarge?.copyWith(
                                 fontWeight: FontWeight.bold,
@@ -543,7 +437,7 @@ class _PushupsTestScreenState extends State<PushupsTestScreen> {
                                 ),
                                 const SizedBox(height: AppConstants.spacingSmall),
                                 Text(
-                                  'In progress...',
+                                  'Hold strong!',
                                   style: Theme.of(context)
                                       .textTheme
                                       .titleLarge
@@ -571,7 +465,8 @@ class _PushupsTestScreenState extends State<PushupsTestScreen> {
                               ),
                           children: [
                             const TextSpan(
-                                text: 'Perform as many push-ups as you can with '),
+                                text:
+                                    'Hold the plank position for as long as you can with '),
                             TextSpan(
                               text: 'good form',
                               style: TextStyle(
@@ -589,28 +484,22 @@ class _PushupsTestScreenState extends State<PushupsTestScreen> {
                       _buildSectionTitle(context, 'How to do it:'),
                       const SizedBox(height: AppConstants.spacingMedium),
                       _buildInstructionItem(
-                          context, 'Start in a plank position'),
+                          context, 'Place your forearms on the floor'),
+                      _buildInstructionItem(context,
+                          'Keep your body in a straight line from head to heels'),
                       _buildInstructionItem(
-                          context, 'Keep your body in a straight line'),
-                      _buildInstructionItem(context,
-                          'Lower your chest toward the floor, then push back up'),
-                      _buildInstructionItem(context,
-                          'Choose the hardest variation you can perform safely'),
+                          context, 'Engage your core and glutes'),
+                      _buildInstructionItem(context, 'Breathe normally'),
                       const SizedBox(height: AppConstants.spacingXLarge),
 
                       // Important section
                       _buildSectionTitle(context, 'Important:'),
                       const SizedBox(height: AppConstants.spacingMedium),
-                      _buildTipCard(
-                          context,
-                          Icons.info_outline,
-                          'If you can\'t do a regular push-up, try knee, incline, or wall push-ups'),
-                      const SizedBox(height: AppConstants.spacingSmall),
-                      _buildTipCard(context, Icons.verified,
-                          'Quality matters more than the number of reps'),
-                      const SizedBox(height: AppConstants.spacingSmall),
                       _buildTipCard(context, Icons.warning_amber_outlined,
-                          'Stop if you feel pain in your shoulders or wrists'),
+                          'Stop when you lose form or feel pain'),
+                      const SizedBox(height: AppConstants.spacingSmall),
+                      _buildTipCard(context, Icons.info_outline,
+                          'You may perform the plank on your knees if needed'),
                       const SizedBox(height: AppConstants.spacingXLarge),
 
                       // Ready section
@@ -681,7 +570,7 @@ class _PushupsTestScreenState extends State<PushupsTestScreen> {
                   child: ElevatedButton(
                     onPressed: !_hasStarted
                         ? _startExercise
-                        : _showPushupDetailsDialog,
+                        : _showTimeDialog,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                         vertical: AppConstants.spacingLarge,
