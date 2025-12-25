@@ -14,6 +14,7 @@ class FitnessTestRepositoryImpl implements FitnessTestRepository {
   @override
   Future<Either<Failure, void>> submitTestResults({
     required String userId,
+    required String pushupsType,
     required int maxSquats,
     required int maxPushUps,
     required int maxReverseSnowAngels45s,
@@ -23,6 +24,7 @@ class FitnessTestRepositoryImpl implements FitnessTestRepository {
     try {
       final model = FitnessTestResultModel(
         userId: userId,
+        pushupsType: pushupsType,
         results: FitnessTestResults(
           maxPushUps: maxPushUps,
           maxSquats: maxSquats,

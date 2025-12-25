@@ -23,6 +23,8 @@ FitnessTestResultModel _$FitnessTestResultModelFromJson(
 mixin _$FitnessTestResultModel {
   @JsonKey(name: 'user_id')
   String get userId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'pushups_type')
+  String get pushupsType => throw _privateConstructorUsedError;
   FitnessTestResults get results => throw _privateConstructorUsedError;
 
   /// Serializes this FitnessTestResultModel to a JSON map.
@@ -42,7 +44,9 @@ abstract class $FitnessTestResultModelCopyWith<$Res> {
       _$FitnessTestResultModelCopyWithImpl<$Res, FitnessTestResultModel>;
   @useResult
   $Res call(
-      {@JsonKey(name: 'user_id') String userId, FitnessTestResults results});
+      {@JsonKey(name: 'user_id') String userId,
+      @JsonKey(name: 'pushups_type') String pushupsType,
+      FitnessTestResults results});
 
   $FitnessTestResultsCopyWith<$Res> get results;
 }
@@ -64,12 +68,17 @@ class _$FitnessTestResultModelCopyWithImpl<$Res,
   @override
   $Res call({
     Object? userId = null,
+    Object? pushupsType = null,
     Object? results = null,
   }) {
     return _then(_value.copyWith(
       userId: null == userId
           ? _value.userId
           : userId // ignore: cast_nullable_to_non_nullable
+              as String,
+      pushupsType: null == pushupsType
+          ? _value.pushupsType
+          : pushupsType // ignore: cast_nullable_to_non_nullable
               as String,
       results: null == results
           ? _value.results
@@ -99,7 +108,9 @@ abstract class _$$FitnessTestResultModelImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {@JsonKey(name: 'user_id') String userId, FitnessTestResults results});
+      {@JsonKey(name: 'user_id') String userId,
+      @JsonKey(name: 'pushups_type') String pushupsType,
+      FitnessTestResults results});
 
   @override
   $FitnessTestResultsCopyWith<$Res> get results;
@@ -121,12 +132,17 @@ class __$$FitnessTestResultModelImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? userId = null,
+    Object? pushupsType = null,
     Object? results = null,
   }) {
     return _then(_$FitnessTestResultModelImpl(
       userId: null == userId
           ? _value.userId
           : userId // ignore: cast_nullable_to_non_nullable
+              as String,
+      pushupsType: null == pushupsType
+          ? _value.pushupsType
+          : pushupsType // ignore: cast_nullable_to_non_nullable
               as String,
       results: null == results
           ? _value.results
@@ -140,7 +156,9 @@ class __$$FitnessTestResultModelImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$FitnessTestResultModelImpl implements _FitnessTestResultModel {
   const _$FitnessTestResultModelImpl(
-      {@JsonKey(name: 'user_id') required this.userId, required this.results});
+      {@JsonKey(name: 'user_id') required this.userId,
+      @JsonKey(name: 'pushups_type') required this.pushupsType,
+      required this.results});
 
   factory _$FitnessTestResultModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$FitnessTestResultModelImplFromJson(json);
@@ -149,11 +167,14 @@ class _$FitnessTestResultModelImpl implements _FitnessTestResultModel {
   @JsonKey(name: 'user_id')
   final String userId;
   @override
+  @JsonKey(name: 'pushups_type')
+  final String pushupsType;
+  @override
   final FitnessTestResults results;
 
   @override
   String toString() {
-    return 'FitnessTestResultModel(userId: $userId, results: $results)';
+    return 'FitnessTestResultModel(userId: $userId, pushupsType: $pushupsType, results: $results)';
   }
 
   @override
@@ -162,12 +183,14 @@ class _$FitnessTestResultModelImpl implements _FitnessTestResultModel {
         (other.runtimeType == runtimeType &&
             other is _$FitnessTestResultModelImpl &&
             (identical(other.userId, userId) || other.userId == userId) &&
+            (identical(other.pushupsType, pushupsType) ||
+                other.pushupsType == pushupsType) &&
             (identical(other.results, results) || other.results == results));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, userId, results);
+  int get hashCode => Object.hash(runtimeType, userId, pushupsType, results);
 
   /// Create a copy of FitnessTestResultModel
   /// with the given fields replaced by the non-null parameter values.
@@ -189,6 +212,7 @@ class _$FitnessTestResultModelImpl implements _FitnessTestResultModel {
 abstract class _FitnessTestResultModel implements FitnessTestResultModel {
   const factory _FitnessTestResultModel(
           {@JsonKey(name: 'user_id') required final String userId,
+          @JsonKey(name: 'pushups_type') required final String pushupsType,
           required final FitnessTestResults results}) =
       _$FitnessTestResultModelImpl;
 
@@ -198,6 +222,9 @@ abstract class _FitnessTestResultModel implements FitnessTestResultModel {
   @override
   @JsonKey(name: 'user_id')
   String get userId;
+  @override
+  @JsonKey(name: 'pushups_type')
+  String get pushupsType;
   @override
   FitnessTestResults get results;
 

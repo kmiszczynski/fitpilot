@@ -8,6 +8,7 @@ part 'fitness_test_result_model.g.dart';
 class FitnessTestResultModel with _$FitnessTestResultModel {
   const factory FitnessTestResultModel({
     @JsonKey(name: 'user_id') required String userId,
+    @JsonKey(name: 'pushups_type') required String pushupsType,
     required FitnessTestResults results,
   }) = _FitnessTestResultModel;
 

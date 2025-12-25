@@ -217,6 +217,7 @@ class _MountainClimbersTestScreenState
 
       debugPrint('💾 Submitting fitness test results:');
       debugPrint('   User ID: $userId');
+      debugPrint('   Pushups Type: ${widget.pushupType}');
       debugPrint('   Squats: ${widget.squatCount}');
       debugPrint('   Push-ups: ${widget.pushupCount}');
       debugPrint('   Reverse Snow Angels: ${widget.reverseSnowAngelsCount}');
@@ -226,6 +227,7 @@ class _MountainClimbersTestScreenState
       // Submit results to API
       final result = await _fitnessTestRepository.submitTestResults(
         userId: userId,
+        pushupsType: widget.pushupType,
         maxSquats: widget.squatCount,
         maxPushUps: widget.pushupCount,
         maxReverseSnowAngels45s: widget.reverseSnowAngelsCount,

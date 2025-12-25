@@ -5,6 +5,7 @@ import '../../../../core/error/failures.dart';
 abstract class FitnessTestRepository {
   Future<Either<Failure, void>> submitTestResults({
     required String userId,
+    required String pushupsType,
     required int maxSquats,
     required int maxPushUps,
     required int maxReverseSnowAngels45s,

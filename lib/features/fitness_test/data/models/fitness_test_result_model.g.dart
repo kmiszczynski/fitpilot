@@ -10,6 +10,7 @@ _$FitnessTestResultModelImpl _$$FitnessTestResultModelImplFromJson(
         Map<String, dynamic> json) =>
     _$FitnessTestResultModelImpl(
       userId: json['user_id'] as String,
+      pushupsType: json['pushups_type'] as String,
       results:
           FitnessTestResults.fromJson(json['results'] as Map<String, dynamic>),
     );
@@ -18,6 +19,7 @@ Map<String, dynamic> _$$FitnessTestResultModelImplToJson(
         _$FitnessTestResultModelImpl instance) =>
     <String, dynamic>{
       'user_id': instance.userId,
+      'pushups_type': instance.pushupsType,
       'results': instance.results,
     };
 
