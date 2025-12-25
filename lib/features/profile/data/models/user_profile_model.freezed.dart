@@ -20,12 +20,15 @@ UserProfileModel _$UserProfileModelFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$UserProfileModel {
-  String get name => throw _privateConstructorUsedError;
-  String get email => throw _privateConstructorUsedError;
-  int get age => throw _privateConstructorUsedError;
-  String get sex => throw _privateConstructorUsedError;
-  int get trainingFrequency => throw _privateConstructorUsedError;
-  String get target => throw _privateConstructorUsedError;
+  @JsonKey(name: 'user_id')
+  String? get userId => throw _privateConstructorUsedError;
+  String? get name => throw _privateConstructorUsedError;
+  String? get email => throw _privateConstructorUsedError;
+  int? get age => throw _privateConstructorUsedError;
+  String? get sex => throw _privateConstructorUsedError;
+  @JsonKey(name: 'training_frequency')
+  int? get trainingFrequency => throw _privateConstructorUsedError;
+  String? get target => throw _privateConstructorUsedError;
   List<String> get equipment => throw _privateConstructorUsedError;
 
   /// Serializes this UserProfileModel to a JSON map.
@@ -45,12 +48,13 @@ abstract class $UserProfileModelCopyWith<$Res> {
       _$UserProfileModelCopyWithImpl<$Res, UserProfileModel>;
   @useResult
   $Res call(
-      {String name,
-      String email,
-      int age,
-      String sex,
-      int trainingFrequency,
-      String target,
+      {@JsonKey(name: 'user_id') String? userId,
+      String? name,
+      String? email,
+      int? age,
+      String? sex,
+      @JsonKey(name: 'training_frequency') int? trainingFrequency,
+      String? target,
       List<String> equipment});
 }
 
@@ -69,39 +73,44 @@ class _$UserProfileModelCopyWithImpl<$Res, $Val extends UserProfileModel>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? name = null,
-    Object? email = null,
-    Object? age = null,
-    Object? sex = null,
-    Object? trainingFrequency = null,
-    Object? target = null,
+    Object? userId = freezed,
+    Object? name = freezed,
+    Object? email = freezed,
+    Object? age = freezed,
+    Object? sex = freezed,
+    Object? trainingFrequency = freezed,
+    Object? target = freezed,
     Object? equipment = null,
   }) {
     return _then(_value.copyWith(
-      name: null == name
+      userId: freezed == userId
+          ? _value.userId
+          : userId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      name: freezed == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      email: null == email
+              as String?,
+      email: freezed == email
           ? _value.email
           : email // ignore: cast_nullable_to_non_nullable
-              as String,
-      age: null == age
+              as String?,
+      age: freezed == age
           ? _value.age
           : age // ignore: cast_nullable_to_non_nullable
-              as int,
-      sex: null == sex
+              as int?,
+      sex: freezed == sex
           ? _value.sex
           : sex // ignore: cast_nullable_to_non_nullable
-              as String,
-      trainingFrequency: null == trainingFrequency
+              as String?,
+      trainingFrequency: freezed == trainingFrequency
           ? _value.trainingFrequency
           : trainingFrequency // ignore: cast_nullable_to_non_nullable
-              as int,
-      target: null == target
+              as int?,
+      target: freezed == target
           ? _value.target
           : target // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       equipment: null == equipment
           ? _value.equipment
           : equipment // ignore: cast_nullable_to_non_nullable
@@ -119,12 +128,13 @@ abstract class _$$UserProfileModelImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String name,
-      String email,
-      int age,
-      String sex,
-      int trainingFrequency,
-      String target,
+      {@JsonKey(name: 'user_id') String? userId,
+      String? name,
+      String? email,
+      int? age,
+      String? sex,
+      @JsonKey(name: 'training_frequency') int? trainingFrequency,
+      String? target,
       List<String> equipment});
 }
 
@@ -141,39 +151,44 @@ class __$$UserProfileModelImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? name = null,
-    Object? email = null,
-    Object? age = null,
-    Object? sex = null,
-    Object? trainingFrequency = null,
-    Object? target = null,
+    Object? userId = freezed,
+    Object? name = freezed,
+    Object? email = freezed,
+    Object? age = freezed,
+    Object? sex = freezed,
+    Object? trainingFrequency = freezed,
+    Object? target = freezed,
     Object? equipment = null,
   }) {
     return _then(_$UserProfileModelImpl(
-      name: null == name
+      userId: freezed == userId
+          ? _value.userId
+          : userId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      name: freezed == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      email: null == email
+              as String?,
+      email: freezed == email
           ? _value.email
           : email // ignore: cast_nullable_to_non_nullable
-              as String,
-      age: null == age
+              as String?,
+      age: freezed == age
           ? _value.age
           : age // ignore: cast_nullable_to_non_nullable
-              as int,
-      sex: null == sex
+              as int?,
+      sex: freezed == sex
           ? _value.sex
           : sex // ignore: cast_nullable_to_non_nullable
-              as String,
-      trainingFrequency: null == trainingFrequency
+              as String?,
+      trainingFrequency: freezed == trainingFrequency
           ? _value.trainingFrequency
           : trainingFrequency // ignore: cast_nullable_to_non_nullable
-              as int,
-      target: null == target
+              as int?,
+      target: freezed == target
           ? _value.target
           : target // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       equipment: null == equipment
           ? _value._equipment
           : equipment // ignore: cast_nullable_to_non_nullable
@@ -186,12 +201,13 @@ class __$$UserProfileModelImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$UserProfileModelImpl extends _UserProfileModel {
   const _$UserProfileModelImpl(
-      {required this.name,
-      required this.email,
-      required this.age,
-      required this.sex,
-      required this.trainingFrequency,
-      required this.target,
+      {@JsonKey(name: 'user_id') this.userId,
+      this.name,
+      this.email,
+      this.age,
+      this.sex,
+      @JsonKey(name: 'training_frequency') this.trainingFrequency,
+      this.target,
       final List<String> equipment = const []})
       : _equipment = equipment,
         super._();
@@ -200,17 +216,21 @@ class _$UserProfileModelImpl extends _UserProfileModel {
       _$$UserProfileModelImplFromJson(json);
 
   @override
-  final String name;
+  @JsonKey(name: 'user_id')
+  final String? userId;
   @override
-  final String email;
+  final String? name;
   @override
-  final int age;
+  final String? email;
   @override
-  final String sex;
+  final int? age;
   @override
-  final int trainingFrequency;
+  final String? sex;
   @override
-  final String target;
+  @JsonKey(name: 'training_frequency')
+  final int? trainingFrequency;
+  @override
+  final String? target;
   final List<String> _equipment;
   @override
   @JsonKey()
@@ -222,7 +242,7 @@ class _$UserProfileModelImpl extends _UserProfileModel {
 
   @override
   String toString() {
-    return 'UserProfileModel(name: $name, email: $email, age: $age, sex: $sex, trainingFrequency: $trainingFrequency, target: $target, equipment: $equipment)';
+    return 'UserProfileModel(userId: $userId, name: $name, email: $email, age: $age, sex: $sex, trainingFrequency: $trainingFrequency, target: $target, equipment: $equipment)';
   }
 
   @override
@@ -230,6 +250,7 @@ class _$UserProfileModelImpl extends _UserProfileModel {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$UserProfileModelImpl &&
+            (identical(other.userId, userId) || other.userId == userId) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.email, email) || other.email == email) &&
             (identical(other.age, age) || other.age == age) &&
@@ -245,6 +266,7 @@ class _$UserProfileModelImpl extends _UserProfileModel {
   @override
   int get hashCode => Object.hash(
       runtimeType,
+      userId,
       name,
       email,
       age,
@@ -272,12 +294,13 @@ class _$UserProfileModelImpl extends _UserProfileModel {
 
 abstract class _UserProfileModel extends UserProfileModel {
   const factory _UserProfileModel(
-      {required final String name,
-      required final String email,
-      required final int age,
-      required final String sex,
-      required final int trainingFrequency,
-      required final String target,
+      {@JsonKey(name: 'user_id') final String? userId,
+      final String? name,
+      final String? email,
+      final int? age,
+      final String? sex,
+      @JsonKey(name: 'training_frequency') final int? trainingFrequency,
+      final String? target,
       final List<String> equipment}) = _$UserProfileModelImpl;
   const _UserProfileModel._() : super._();
 
@@ -285,17 +308,21 @@ abstract class _UserProfileModel extends UserProfileModel {
       _$UserProfileModelImpl.fromJson;
 
   @override
-  String get name;
+  @JsonKey(name: 'user_id')
+  String? get userId;
   @override
-  String get email;
+  String? get name;
   @override
-  int get age;
+  String? get email;
   @override
-  String get sex;
+  int? get age;
   @override
-  int get trainingFrequency;
+  String? get sex;
   @override
-  String get target;
+  @JsonKey(name: 'training_frequency')
+  int? get trainingFrequency;
+  @override
+  String? get target;
   @override
   List<String> get equipment;
 

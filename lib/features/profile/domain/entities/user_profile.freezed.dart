@@ -20,12 +20,22 @@ UserProfile _$UserProfileFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$UserProfile {
-  String get name => throw _privateConstructorUsedError;
-  String get email => throw _privateConstructorUsedError;
-  int get age => throw _privateConstructorUsedError;
-  String get sex => throw _privateConstructorUsedError;
-  int get trainingFrequency => throw _privateConstructorUsedError;
-  String get target => throw _privateConstructorUsedError;
+  @JsonKey(name: 'user_id')
+  String? get userId =>
+      throw _privateConstructorUsedError; // User ID from backend (snake_case in API)
+  String? get name =>
+      throw _privateConstructorUsedError; // Nullable to handle API responses without profile data
+  String? get email =>
+      throw _privateConstructorUsedError; // Nullable to handle API responses without profile data
+  int? get age =>
+      throw _privateConstructorUsedError; // Nullable to handle API responses without profile data
+  String? get sex =>
+      throw _privateConstructorUsedError; // Nullable to handle API responses without profile data
+  @JsonKey(name: 'training_frequency')
+  int? get trainingFrequency =>
+      throw _privateConstructorUsedError; // Nullable, snake_case in API
+  String? get target =>
+      throw _privateConstructorUsedError; // Nullable to handle API responses without profile data
   List<String> get equipment => throw _privateConstructorUsedError;
 
   /// Serializes this UserProfile to a JSON map.
@@ -45,12 +55,13 @@ abstract class $UserProfileCopyWith<$Res> {
       _$UserProfileCopyWithImpl<$Res, UserProfile>;
   @useResult
   $Res call(
-      {String name,
-      String email,
-      int age,
-      String sex,
-      int trainingFrequency,
-      String target,
+      {@JsonKey(name: 'user_id') String? userId,
+      String? name,
+      String? email,
+      int? age,
+      String? sex,
+      @JsonKey(name: 'training_frequency') int? trainingFrequency,
+      String? target,
       List<String> equipment});
 }
 
@@ -69,39 +80,44 @@ class _$UserProfileCopyWithImpl<$Res, $Val extends UserProfile>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? name = null,
-    Object? email = null,
-    Object? age = null,
-    Object? sex = null,
-    Object? trainingFrequency = null,
-    Object? target = null,
+    Object? userId = freezed,
+    Object? name = freezed,
+    Object? email = freezed,
+    Object? age = freezed,
+    Object? sex = freezed,
+    Object? trainingFrequency = freezed,
+    Object? target = freezed,
     Object? equipment = null,
   }) {
     return _then(_value.copyWith(
-      name: null == name
+      userId: freezed == userId
+          ? _value.userId
+          : userId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      name: freezed == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      email: null == email
+              as String?,
+      email: freezed == email
           ? _value.email
           : email // ignore: cast_nullable_to_non_nullable
-              as String,
-      age: null == age
+              as String?,
+      age: freezed == age
           ? _value.age
           : age // ignore: cast_nullable_to_non_nullable
-              as int,
-      sex: null == sex
+              as int?,
+      sex: freezed == sex
           ? _value.sex
           : sex // ignore: cast_nullable_to_non_nullable
-              as String,
-      trainingFrequency: null == trainingFrequency
+              as String?,
+      trainingFrequency: freezed == trainingFrequency
           ? _value.trainingFrequency
           : trainingFrequency // ignore: cast_nullable_to_non_nullable
-              as int,
-      target: null == target
+              as int?,
+      target: freezed == target
           ? _value.target
           : target // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       equipment: null == equipment
           ? _value.equipment
           : equipment // ignore: cast_nullable_to_non_nullable
@@ -119,12 +135,13 @@ abstract class _$$UserProfileImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String name,
-      String email,
-      int age,
-      String sex,
-      int trainingFrequency,
-      String target,
+      {@JsonKey(name: 'user_id') String? userId,
+      String? name,
+      String? email,
+      int? age,
+      String? sex,
+      @JsonKey(name: 'training_frequency') int? trainingFrequency,
+      String? target,
       List<String> equipment});
 }
 
@@ -141,39 +158,44 @@ class __$$UserProfileImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? name = null,
-    Object? email = null,
-    Object? age = null,
-    Object? sex = null,
-    Object? trainingFrequency = null,
-    Object? target = null,
+    Object? userId = freezed,
+    Object? name = freezed,
+    Object? email = freezed,
+    Object? age = freezed,
+    Object? sex = freezed,
+    Object? trainingFrequency = freezed,
+    Object? target = freezed,
     Object? equipment = null,
   }) {
     return _then(_$UserProfileImpl(
-      name: null == name
+      userId: freezed == userId
+          ? _value.userId
+          : userId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      name: freezed == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      email: null == email
+              as String?,
+      email: freezed == email
           ? _value.email
           : email // ignore: cast_nullable_to_non_nullable
-              as String,
-      age: null == age
+              as String?,
+      age: freezed == age
           ? _value.age
           : age // ignore: cast_nullable_to_non_nullable
-              as int,
-      sex: null == sex
+              as int?,
+      sex: freezed == sex
           ? _value.sex
           : sex // ignore: cast_nullable_to_non_nullable
-              as String,
-      trainingFrequency: null == trainingFrequency
+              as String?,
+      trainingFrequency: freezed == trainingFrequency
           ? _value.trainingFrequency
           : trainingFrequency // ignore: cast_nullable_to_non_nullable
-              as int,
-      target: null == target
+              as int?,
+      target: freezed == target
           ? _value.target
           : target // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       equipment: null == equipment
           ? _value._equipment
           : equipment // ignore: cast_nullable_to_non_nullable
@@ -186,12 +208,13 @@ class __$$UserProfileImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$UserProfileImpl implements _UserProfile {
   const _$UserProfileImpl(
-      {required this.name,
-      required this.email,
-      required this.age,
-      required this.sex,
-      required this.trainingFrequency,
-      required this.target,
+      {@JsonKey(name: 'user_id') this.userId,
+      this.name,
+      this.email,
+      this.age,
+      this.sex,
+      @JsonKey(name: 'training_frequency') this.trainingFrequency,
+      this.target,
       final List<String> equipment = const []})
       : _equipment = equipment;
 
@@ -199,18 +222,30 @@ class _$UserProfileImpl implements _UserProfile {
       _$$UserProfileImplFromJson(json);
 
   @override
-  final String name;
+  @JsonKey(name: 'user_id')
+  final String? userId;
+// User ID from backend (snake_case in API)
   @override
-  final String email;
+  final String? name;
+// Nullable to handle API responses without profile data
   @override
-  final int age;
+  final String? email;
+// Nullable to handle API responses without profile data
   @override
-  final String sex;
+  final int? age;
+// Nullable to handle API responses without profile data
   @override
-  final int trainingFrequency;
+  final String? sex;
+// Nullable to handle API responses without profile data
   @override
-  final String target;
+  @JsonKey(name: 'training_frequency')
+  final int? trainingFrequency;
+// Nullable, snake_case in API
+  @override
+  final String? target;
+// Nullable to handle API responses without profile data
   final List<String> _equipment;
+// Nullable to handle API responses without profile data
   @override
   @JsonKey()
   List<String> get equipment {
@@ -221,7 +256,7 @@ class _$UserProfileImpl implements _UserProfile {
 
   @override
   String toString() {
-    return 'UserProfile(name: $name, email: $email, age: $age, sex: $sex, trainingFrequency: $trainingFrequency, target: $target, equipment: $equipment)';
+    return 'UserProfile(userId: $userId, name: $name, email: $email, age: $age, sex: $sex, trainingFrequency: $trainingFrequency, target: $target, equipment: $equipment)';
   }
 
   @override
@@ -229,6 +264,7 @@ class _$UserProfileImpl implements _UserProfile {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$UserProfileImpl &&
+            (identical(other.userId, userId) || other.userId == userId) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.email, email) || other.email == email) &&
             (identical(other.age, age) || other.age == age) &&
@@ -244,6 +280,7 @@ class _$UserProfileImpl implements _UserProfile {
   @override
   int get hashCode => Object.hash(
       runtimeType,
+      userId,
       name,
       email,
       age,
@@ -270,29 +307,34 @@ class _$UserProfileImpl implements _UserProfile {
 
 abstract class _UserProfile implements UserProfile {
   const factory _UserProfile(
-      {required final String name,
-      required final String email,
-      required final int age,
-      required final String sex,
-      required final int trainingFrequency,
-      required final String target,
+      {@JsonKey(name: 'user_id') final String? userId,
+      final String? name,
+      final String? email,
+      final int? age,
+      final String? sex,
+      @JsonKey(name: 'training_frequency') final int? trainingFrequency,
+      final String? target,
       final List<String> equipment}) = _$UserProfileImpl;
 
   factory _UserProfile.fromJson(Map<String, dynamic> json) =
       _$UserProfileImpl.fromJson;
 
   @override
-  String get name;
+  @JsonKey(name: 'user_id')
+  String? get userId; // User ID from backend (snake_case in API)
   @override
-  String get email;
+  String? get name; // Nullable to handle API responses without profile data
   @override
-  int get age;
+  String? get email; // Nullable to handle API responses without profile data
   @override
-  String get sex;
+  int? get age; // Nullable to handle API responses without profile data
   @override
-  int get trainingFrequency;
+  String? get sex; // Nullable to handle API responses without profile data
   @override
-  String get target;
+  @JsonKey(name: 'training_frequency')
+  int? get trainingFrequency; // Nullable, snake_case in API
+  @override
+  String? get target; // Nullable to handle API responses without profile data
   @override
   List<String> get equipment;
 

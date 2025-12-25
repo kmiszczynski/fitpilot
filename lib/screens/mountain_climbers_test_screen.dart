@@ -7,6 +7,10 @@ import '../features/exercises/data/datasources/exercise_remote_datasource.dart';
 import '../features/exercises/data/repositories/exercise_repository_impl.dart';
 import '../features/exercises/domain/entities/exercise.dart';
 import '../features/exercises/domain/repositories/exercise_repository.dart';
+import '../features/fitness_test/data/datasources/fitness_test_remote_datasource.dart';
+import '../features/fitness_test/data/repositories/fitness_test_repository_impl.dart';
+import '../features/fitness_test/domain/repositories/fitness_test_repository.dart';
+import '../services/storage_service.dart';
 import '../widgets/exercise_video_player.dart';
 
 class MountainClimbersTestScreen extends StatefulWidget {
@@ -38,15 +42,20 @@ class _MountainClimbersTestScreenState
   Timer? _timer;
 
   late final ExerciseRepository _exerciseRepository;
+  late final FitnessTestRepository _fitnessTestRepository;
   Exercise? _exercise;
   bool _isLoadingExercise = true;
   String? _exerciseLoadError;
+  bool _isSubmittingResults = false;
 
   @override
   void initState() {
     super.initState();
     _exerciseRepository = ExerciseRepositoryImpl(
       ExerciseRemoteDataSourceImpl(DioClient.instance),
+    );
+    _fitnessTestRepository = FitnessTestRepositoryImpl(
+      FitnessTestRemoteDataSourceImpl(DioClient.instance),
     );
     _loadExerciseDetails();
   }
@@ -141,21 +150,32 @@ class _MountainClimbersTestScreenState
             ),
           ),
           ElevatedButton(
-            onPressed: () {
-              final count = int.tryParse(controller.text);
-              if (count != null && count >= 0) {
-                Navigator.pop(context);
-                _saveCountAndFinish(count);
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Please enter a valid number'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-            },
-            child: const Text('Finish'),
+            onPressed: _isSubmittingResults
+                ? null
+                : () {
+                    final count = int.tryParse(controller.text);
+                    if (count != null && count >= 0) {
+                      Navigator.pop(context);
+                      _saveCountAndFinish(count);
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Please enter a valid number'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  },
+            child: _isSubmittingResults
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                : const Text('Finish'),
           ),
         ],
       ),
@@ -163,38 +183,119 @@ class _MountainClimbersTestScreenState
   }
 
   Future<void> _saveCountAndFinish(int count) async {
-    // TODO: Save to persistent storage (shared preferences or database)
-    debugPrint('💾 Saving fitness test data:');
-    debugPrint('   Squats: ${widget.squatCount}');
-    debugPrint('   Push-ups (${widget.pushupType}): ${widget.pushupCount}');
-    debugPrint('   Reverse Snow Angels: ${widget.reverseSnowAngelsCount}');
-    debugPrint('   Plank: ${widget.plankTime} seconds');
-    debugPrint('   Mountain Climbers: $count');
+    setState(() {
+      _isSubmittingResults = true;
+    });
 
-    // Show success message
-    if (!mounted) return;
+    try {
+      // Get user ID from storage
+      final userId = await StorageService.getUserId();
 
-    final String message = count == 0
-        ? 'Don\'t worry, everyone starts somewhere! Keep it up! 💪'
-        : 'Congratulations! You completed the fitness test! 💪';
+      debugPrint('🔍 Checking for user ID in storage...');
+      if (userId == null) {
+        debugPrint('❌ User ID not found in storage!');
+        debugPrint('   This means either:');
+        debugPrint('   1. Backend did not return "user_id" in GET /profile response');
+        debugPrint('   2. Profile was not loaded after login');
+        debugPrint('   3. User is not logged in');
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: AppTheme.success,
-        duration: const Duration(seconds: 2),
-      ),
-    );
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error: User ID not found. Please log in again.'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 3),
+          ),
+        );
+        setState(() {
+          _isSubmittingResults = false;
+        });
+        return;
+      }
 
-    // TODO: Navigate to completion/results screen
-    await Future.delayed(const Duration(milliseconds: 800));
-    if (!mounted) return;
+      debugPrint('✅ User ID found in storage: $userId');
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Fitness test completed! Results screen coming soon...'),
-      ),
-    );
+      debugPrint('💾 Submitting fitness test results:');
+      debugPrint('   User ID: $userId');
+      debugPrint('   Squats: ${widget.squatCount}');
+      debugPrint('   Push-ups: ${widget.pushupCount}');
+      debugPrint('   Reverse Snow Angels: ${widget.reverseSnowAngelsCount}');
+      debugPrint('   Plank: ${widget.plankTime} seconds');
+      debugPrint('   Mountain Climbers: $count');
+
+      // Submit results to API
+      final result = await _fitnessTestRepository.submitTestResults(
+        userId: userId,
+        maxSquats: widget.squatCount,
+        maxPushUps: widget.pushupCount,
+        maxReverseSnowAngels45s: widget.reverseSnowAngelsCount,
+        plankMaxTimeSeconds: widget.plankTime,
+        mountainClimbers45s: count,
+      );
+
+      if (!mounted) return;
+
+      result.fold(
+        // Error case
+        (failure) {
+          debugPrint('❌ Failed to submit results: ${failure.message}');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to save results: ${failure.message}'),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 4),
+              action: SnackBarAction(
+                label: 'Retry',
+                textColor: Colors.white,
+                onPressed: () => _saveCountAndFinish(count),
+              ),
+            ),
+          );
+        },
+        // Success case
+        (_) {
+          debugPrint('✅ Fitness test results submitted successfully!');
+
+          final String message = count == 0
+              ? 'Results saved! Don\'t worry, everyone starts somewhere! 💪'
+              : 'Congratulations! Your fitness test results have been saved! 💪';
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(message),
+              backgroundColor: AppTheme.success,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+
+          // TODO: Navigate to completion/results screen
+          Future.delayed(const Duration(milliseconds: 1500), () {
+            if (!mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Results screen coming soon...'),
+              ),
+            );
+          });
+        },
+      );
+    } catch (e) {
+      debugPrint('❌ Unexpected error: $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Unexpected error: $e'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 4),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmittingResults = false;
+        });
+      }
+    }
   }
 
   void _startTimer() {

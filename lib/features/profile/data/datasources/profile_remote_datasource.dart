@@ -25,6 +25,10 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       if (response.statusCode == 200) {
         final data = response.data as Map<String, dynamic>;
 
+        // Debug: Print the raw response
+        print('📥 GET /profile response:');
+        print('   Raw data: $data');
+
         // Check if response contains an error field (API returns {error: "..."})
         if (data.containsKey('error')) {
           // Profile not found - throw 404 exception
@@ -34,7 +38,13 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
           );
         }
 
-        return UserProfileModel.fromJson(data);
+        try {
+          return UserProfileModel.fromJson(data);
+        } catch (e) {
+          print('❌ Error parsing profile JSON: $e');
+          print('   This usually means the API response format doesn\'t match the model');
+          rethrow;
+        }
       } else if (response.statusCode == 404) {
         throw ServerException(
           message: 'Profile not found',

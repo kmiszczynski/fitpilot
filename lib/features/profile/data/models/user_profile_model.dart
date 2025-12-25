@@ -11,12 +11,13 @@ class UserProfileModel with _$UserProfileModel {
   const UserProfileModel._();
 
   const factory UserProfileModel({
-    required String name,
-    required String email,
-    required int age,
-    required String sex,
-    required int trainingFrequency,
-    required String target,
+    @JsonKey(name: 'user_id') String? userId,
+    String? name,
+    String? email,
+    int? age,
+    String? sex,
+    @JsonKey(name: 'training_frequency') int? trainingFrequency,
+    String? target,
     @Default([]) List<String> equipment,
   }) = _UserProfileModel;
 
@@ -26,6 +27,7 @@ class UserProfileModel with _$UserProfileModel {
   /// Convert model to domain entity
   UserProfile toEntity() {
     return UserProfile(
+      userId: userId,
       name: name,
       email: email,
       age: age,
@@ -39,6 +41,7 @@ class UserProfileModel with _$UserProfileModel {
   /// Create model from domain entity
   factory UserProfileModel.fromEntity(UserProfile entity) {
     return UserProfileModel(
+      userId: entity.userId,
       name: entity.name,
       email: entity.email,
       age: entity.age,

@@ -61,6 +61,18 @@ class AuthInterceptor extends Interceptor {
 
     if (idToken != null) {
       options.headers['Authorization'] = 'Bearer $idToken';
+
+      if (kDebugMode) {
+        print('🔐 Auth Interceptor:');
+        print('   Adding Authorization header');
+        print('   Token length: ${idToken.length} characters');
+        print('   Token (first 20 chars): ${idToken.substring(0, idToken.length > 20 ? 20 : idToken.length)}...');
+        print('   Header format: Bearer <token>');
+      }
+    } else {
+      if (kDebugMode) {
+        print('⚠️ Auth Interceptor: No ID token found in storage');
+      }
     }
 
     super.onRequest(options, handler);
