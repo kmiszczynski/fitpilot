@@ -61,6 +61,10 @@ dependencies:
   # Image Caching
   cached_network_image: ^3.4.1
 
+  # File Caching
+  flutter_cache_manager: ^3.4.1
+  path_provider: ^2.1.5
+
   # Video Player
   video_player: ^2.9.2
 

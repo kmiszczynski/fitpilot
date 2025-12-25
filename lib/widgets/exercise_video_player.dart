@@ -1,5 +1,8 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import '../core/cache/video_cache_manager.dart';
 
 class ExerciseVideoPlayer extends StatefulWidget {
   final String videoUrl;
@@ -18,6 +21,9 @@ class _ExerciseVideoPlayerState extends State<ExerciseVideoPlayer> {
   bool _isInitialized = false;
   bool _hasError = false;
   String? _errorMessage;
+  bool _isCached = false;
+  double _downloadProgress = 0.0;
+  bool _isDownloading = false;
 
   @override
   void initState() {
@@ -27,38 +33,84 @@ class _ExerciseVideoPlayerState extends State<ExerciseVideoPlayer> {
 
   Future<void> _initializeVideo() async {
     try {
-      _controller = VideoPlayerController.networkUrl(
-        Uri.parse(widget.videoUrl),
-      );
+      // Check if video is already cached
+      final isCached = await VideoCacheManager.instance.isVideoCached(widget.videoUrl);
+      debugPrint('═══════════════════════════════════════════════════');
+      debugPrint('FITPILOT VIDEO: Cache check result: ${isCached ? "✅ CACHED" : "❌ NOT CACHED"}');
+      debugPrint('═══════════════════════════════════════════════════');
 
-      await _controller.initialize();
-
-      if (!mounted) return;
-
-      setState(() {
-        _isInitialized = true;
-      });
-
-      // Set video to loop
-      _controller.setLooping(true);
-
-      // Auto-play the video
-      _controller.play();
-
-      // Listen to player state changes
-      _controller.addListener(() {
+      if (isCached) {
+        // Use cached video - no downloading needed
         if (mounted) {
-          setState(() {});
+          setState(() {
+            _isCached = true;
+            _isDownloading = false;
+          });
         }
-      });
+
+        debugPrint('FITPILOT VIDEO: Loading from cache (no network needed)');
+        final cachedFile = await VideoCacheManager.instance.getCachedVideoFile(widget.videoUrl);
+        if (cachedFile != null) {
+          debugPrint('FITPILOT VIDEO: ✅ SUCCESS - Video loaded from cache');
+          await _initializeFromFile(cachedFile);
+          return;
+        }
+      }
+
+      // Video not cached, download and cache it
+      debugPrint('FITPILOT VIDEO: ⬇️ DOWNLOADING from network (first time)...');
+      if (mounted) {
+        setState(() {
+          _isDownloading = true;
+          _isCached = false;
+        });
+      }
+
+      final cachedFile = await VideoCacheManager.instance.getCachedVideo(widget.videoUrl);
+      debugPrint('FITPILOT VIDEO: ✅ SUCCESS - Downloaded and cached');
+
+      await _initializeFromFile(cachedFile);
+
+      if (mounted) {
+        setState(() {
+          _isDownloading = false;
+          _isCached = true;
+        });
+      }
     } catch (e) {
+      debugPrint('FITPILOT VIDEO: ❌ ERROR - $e');
       if (!mounted) return;
 
       setState(() {
         _hasError = true;
+        _isDownloading = false;
         _errorMessage = 'Failed to load video: ${e.toString()}';
       });
     }
+  }
+
+  Future<void> _initializeFromFile(File file) async {
+    _controller = VideoPlayerController.file(file);
+    await _controller.initialize();
+
+    if (!mounted) return;
+
+    setState(() {
+      _isInitialized = true;
+    });
+
+    // Set video to loop
+    _controller.setLooping(true);
+
+    // Auto-play the video
+    _controller.play();
+
+    // Listen to player state changes
+    _controller.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
   }
 
   @override
@@ -111,8 +163,59 @@ class _ExerciseVideoPlayerState extends State<ExerciseVideoPlayer> {
         width: double.infinity,
         height: 300,
         color: Colors.grey[200],
-        child: const Center(
-          child: CircularProgressIndicator(),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              Text(
+                _isDownloading
+                    ? 'Downloading video...'
+                    : _isCached
+                        ? 'Loading from cache...'
+                        : 'Loading video...',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 14,
+                ),
+              ),
+              if (_isCached)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.download_done,
+                        size: 16,
+                        color: Colors.green[600],
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Using cached version',
+                        style: TextStyle(
+                          color: Colors.green[600],
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              if (_isDownloading)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    'This may take a moment...',
+                    style: TextStyle(
+                      color: Colors.grey[500],
+                      fontSize: 11,
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       );
     }
