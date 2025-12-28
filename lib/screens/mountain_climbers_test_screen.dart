@@ -12,6 +12,7 @@ import '../features/fitness_test/data/repositories/fitness_test_repository_impl.
 import '../features/fitness_test/domain/repositories/fitness_test_repository.dart';
 import '../services/storage_service.dart';
 import '../widgets/exercise_video_player.dart';
+import 'fitness_test_summary_screen.dart';
 
 class MountainClimbersTestScreen extends StatefulWidget {
   final int squatCount;
@@ -255,27 +256,33 @@ class _MountainClimbersTestScreenState
           );
         },
         // Success case
-        (_) {
+        (response) {
           debugPrint('✅ Fitness test results submitted successfully!');
+          debugPrint('   Test ID: ${response.testId}');
+          debugPrint('   Global Level: ${response.levels.globalLevel}');
 
           final String message = count == 0
               ? 'Results saved! Don\'t worry, everyone starts somewhere! 💪'
-              : 'Congratulations! Your fitness test results have been saved! 💪';
+              : 'Congratulations! Your fitness test is complete! 💪';
 
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(message),
               backgroundColor: AppTheme.success,
-              duration: const Duration(seconds: 3),
+              duration: const Duration(seconds: 2),
             ),
           );
 
-          // TODO: Navigate to completion/results screen
-          Future.delayed(const Duration(milliseconds: 1500), () {
+          // Navigate to summary screen
+          Future.delayed(const Duration(milliseconds: 800), () {
             if (!mounted) return;
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Results screen coming soon...'),
+
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => FitnessTestSummaryScreen(
+                  testResponse: response,
+                ),
               ),
             );
           });

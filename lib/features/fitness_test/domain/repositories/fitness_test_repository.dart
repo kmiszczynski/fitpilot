@@ -1,9 +1,10 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/error/failures.dart';
+import '../../data/models/fitness_test_response_model.dart';
 
 /// Fitness test repository interface
 abstract class FitnessTestRepository {
-  Future<Either<Failure, void>> submitTestResults({
+  Future<Either<Failure, FitnessTestResponseModel>> submitTestResults({
     required String userId,
     required String pushupsType,
     required int maxSquats,

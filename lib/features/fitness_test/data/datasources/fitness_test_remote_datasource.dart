@@ -3,11 +3,13 @@ import 'package:flutter/foundation.dart';
 import '../../../../core/network/dio_client.dart';
 import '../../../../core/error/exceptions.dart';
 import '../models/fitness_test_result_model.dart';
+import '../models/fitness_test_response_model.dart';
 
 /// Fitness test remote data source
 /// Handles API calls for fitness test operations
 abstract class FitnessTestRemoteDataSource {
-  Future<void> submitTestResults(FitnessTestResultModel results);
+  Future<FitnessTestResponseModel> submitTestResults(
+      FitnessTestResultModel results);
 }
 
 class FitnessTestRemoteDataSourceImpl implements FitnessTestRemoteDataSource {
@@ -16,7 +18,8 @@ class FitnessTestRemoteDataSourceImpl implements FitnessTestRemoteDataSource {
   FitnessTestRemoteDataSourceImpl(this._dioClient);
 
   @override
-  Future<void> submitTestResults(FitnessTestResultModel results) async {
+  Future<FitnessTestResponseModel> submitTestResults(
+      FitnessTestResultModel results) async {
     try {
       final jsonData = results.toJson();
       debugPrint('📤 Submitting fitness test results to API:');
@@ -29,7 +32,10 @@ class FitnessTestRemoteDataSourceImpl implements FitnessTestRemoteDataSource {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         debugPrint('✅ Fitness test results submitted successfully');
-        return;
+        debugPrint('   Response: ${response.data}');
+
+        return FitnessTestResponseModel.fromJson(
+            response.data as Map<String, dynamic>);
       } else {
         throw ServerException(
           message: 'Failed to submit fitness test results',

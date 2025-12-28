@@ -4,6 +4,7 @@ import '../../../../core/error/failures.dart';
 import '../../domain/repositories/fitness_test_repository.dart';
 import '../datasources/fitness_test_remote_datasource.dart';
 import '../models/fitness_test_result_model.dart';
+import '../models/fitness_test_response_model.dart';
 
 /// Fitness test repository implementation
 class FitnessTestRepositoryImpl implements FitnessTestRepository {
@@ -12,7 +13,7 @@ class FitnessTestRepositoryImpl implements FitnessTestRepository {
   FitnessTestRepositoryImpl(this._remoteDataSource);
 
   @override
-  Future<Either<Failure, void>> submitTestResults({
+  Future<Either<Failure, FitnessTestResponseModel>> submitTestResults({
     required String userId,
     required String pushupsType,
     required int maxSquats,
@@ -34,8 +35,8 @@ class FitnessTestRepositoryImpl implements FitnessTestRepository {
         ),
       );
 
-      await _remoteDataSource.submitTestResults(model);
-      return const Right(null);
+      final response = await _remoteDataSource.submitTestResults(model);
+      return Right(response);
     } on ServerException catch (e) {
       return Left(ServerFailure(
         message: e.message,

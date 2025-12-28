@@ -1,0 +1,124 @@
+When user finished his fitness test we want to display a summary for him.
+
+Now from POST /profile/tests/results we will get a response like this:
+
+{
+    "user_levels_id": "b8883514-0235-40c9-8f06-4e6a6bf45d34",
+    "test_id": "8e92ce03-7d8a-4637-b066-553b693b3775",
+    "levels": {
+        "per_category": {
+            "LOWER": "ADVANCED",
+            "PUSH": "ADVANCED",
+            "PULL": "ADVANCED",
+            "CORE": "ADVANCED",
+            "COND": "BEGINNER"
+        },
+        "global_level": "INTERMEDIATE",
+        "global_level_raw_avg_points": 2.6
+    }
+}
+
+We want to display to the user a summary like this (format it with best design practices):
+
+-- pattern start --
+Your Personalized Results ✨
+Overall Fitness Level: {GLOBAL_LEVEL}
+
+You’ve just completed a full-body fitness assessment — great work.
+Based on your results, we’ve analyzed how your body performs across key movement patterns and created a plan tailored specifically to you.
+
+This is not a generic program.
+It’s designed around your current abilities, so you can train safely and make real progress.
+
+Where You’re Strong 💪
+
+{STRENGTH_1_TITLE}
+{STRENGTH_1_REASON}
+
+{STRENGTH_2_TITLE}
+{STRENGTH_2_REASON}
+
+These areas give you a solid foundation to build on.
+
+Where We’ll Focus Next 🎯
+
+{WEAKNESS_1_TITLE}
+{WEAKNESS_1_REASON}
+
+This doesn’t mean you’re “bad” at it —
+it simply shows where the biggest improvements can happen with the right approach.
+
+Your Plan Is Ready
+
+Using your test results, we’ve prepared a training plan that:
+
+matches your exact fitness level
+
+adapts exercise difficulty to your strengths and limits
+
+progresses gradually, week by week
+
+helps you improve weak areas without overloading your body
+
+🔒 Unlock your personalized training plan and start your first workout today.
+
+[Unlock My Plan]
+Cancel anytime.
+-- pattern end --
+
+Where:
+{GLOBAL_LEVEL} will be replaced with levels.global_level from the response - nicely formatted.
+In strengths we will include strongest categories (with result ADVANCED and INTERMEDIATE) from levels.per_category with their titles and reasons.
+In weaknesses we will include weakest categories (with result BEGINNER) from levels.per_category with their titles and reasons.
+
+Here are the titles and reasons for each category:
+
+LOWER
+
+Strength title: Lower Body Strength
+
+Strength reason: Your squat score suggests solid leg strength and control.
+
+Weakness title: Lower Body Foundation
+
+Weakness reason: We’ll start with simple leg patterns to build strength safely and quickly.
+
+PUSH
+
+Strength title: Upper Body Push Strength
+
+Strength reason: Your push-up result shows good pressing strength and core stability.
+
+Weakness title: Upper Body Push Foundation
+
+Weakness reason: We’ll build push strength with easier variations and steady progression.
+
+PULL
+
+Strength title: Upper Back Control
+
+Strength reason: Your reverse snow angels show good posture control and upper-back endurance.
+
+Weakness title: Upper Back Strength
+
+Weakness reason: We’ll strengthen your upper back to improve posture and shoulder stability.
+
+CORE
+
+Strength title: Core Stability
+
+Strength reason: Your plank time shows strong core endurance and body control.
+
+Weakness title: Core Foundation
+
+Weakness reason: We’ll improve core stability step by step to support every exercise.
+
+COND
+
+Strength title: Cardio & Conditioning
+
+Strength reason: Your mountain climbers score suggests good work capacity and endurance.
+
+Weakness title: Conditioning Base
+
+Weakness reason: We’ll build your stamina gradually without overloading your joints.
