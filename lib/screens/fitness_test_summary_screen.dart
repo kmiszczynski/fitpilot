@@ -3,6 +3,7 @@ import '../constants/app_constants.dart';
 import '../core/theme/app_theme.dart';
 import '../features/fitness_test/data/models/fitness_test_response_model.dart';
 import '../features/fitness_test/domain/models/category_info.dart';
+import 'squat_test_screen.dart';
 
 class FitnessTestSummaryScreen extends StatelessWidget {
   final FitnessTestResponseModel testResponse;
@@ -359,6 +360,27 @@ class FitnessTestSummaryScreen extends StatelessWidget {
                         ),
                       ),
                     ),
+                    const SizedBox(height: AppConstants.spacingSmall),
+                    TextButton(
+                      onPressed: () => _showRepeatTestDialog(context),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.refresh,
+                            size: 18,
+                            color: AppTheme.getMutedTextColor(context),
+                          ),
+                          const SizedBox(width: AppConstants.spacingSmall),
+                          Text(
+                            'Repeat Test',
+                            style: TextStyle(
+                              color: AppTheme.getMutedTextColor(context),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -460,6 +482,104 @@ class FitnessTestSummaryScreen extends StatelessWidget {
                     height: 1.6,
                   ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showRepeatTestDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
+        ),
+        title: const Row(
+          children: [
+            Icon(
+              Icons.warning_amber_rounded,
+              color: Colors.orange,
+              size: 28,
+            ),
+            SizedBox(width: AppConstants.spacingSmall),
+            Flexible(
+              child: Text('Repeat Fitness Test?'),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Are you sure you want to repeat the fitness test from the beginning?',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    height: 1.5,
+                  ),
+            ),
+            const SizedBox(height: AppConstants.spacingMedium),
+            Container(
+              padding: const EdgeInsets.all(AppConstants.spacingMedium),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.error.withOpacity(0.1),
+                borderRadius:
+                    BorderRadius.circular(AppConstants.borderRadiusMedium),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.error.withOpacity(0.3),
+                  width: 1.5,
+                ),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                  const SizedBox(width: AppConstants.spacingSmall),
+                  Expanded(
+                    child: Text(
+                      'Your current test results will be replaced with the new test results.',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.error,
+                            height: 1.4,
+                          ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                color: AppTheme.getMutedTextColor(context),
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              // Navigate back to home first, then to squat test
+              Navigator.of(context).popUntil((route) => route.isFirst);
+              // Navigate to the first test screen (squats)
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const SquatTestScreen(),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Repeat Test'),
           ),
         ],
       ),
